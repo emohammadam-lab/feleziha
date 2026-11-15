@@ -141,7 +141,7 @@ class MetalMarketPlatformTests(TestCase):
         self.assertEqual(res_api.json()['mode'], 'api')
         self.assertTrue(self.product.price > 0)
 
-        # Switch to MANUAL
+        # Switch to MANUAL with English numerals
         res_manual = self.client.post(reverse('market:fast_price_update'), {
             'product_id': self.product.id,
             'pricing_mode': 'manual',
@@ -149,6 +149,16 @@ class MetalMarketPlatformTests(TestCase):
         })
         self.assertEqual(res_manual.status_code, 200)
         self.assertEqual(res_manual.json()['mode'], 'manual')
+
+        # Test Persian numerals with commas input sanitization
+        res_persian = self.client.post(reverse('market:fast_price_update'), {
+            'product_id': self.product.id,
+            'pricing_mode': 'manual',
+            'new_price': '۶۹۵,۰۰۰'
+        })
+        self.assertEqual(res_persian.status_code, 200)
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.price, 695000)
 
     def test_inquiry_and_proforma_flow(self):
         post_data = {

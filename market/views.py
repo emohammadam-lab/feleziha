@@ -263,10 +263,30 @@ def management_dashboard_view(request):
     return render(request, 'market/management_dashboard.html', context)
 
 
+def _clean_price_input(value_str):
+    """
+    Sanitize price input: converts Persian/Arabic numerals to English,
+    strips commas, spaces, and separators, returning a positive integer or 0.
+    """
+    if not value_str:
+        return 0
+    persian_digits = '۰۱۲۳۴۵۶۷۸۹'
+    arabic_digits = '٠١٢٣٤٥٦٧٨٩'
+    s = str(value_str).strip()
+    for i in range(10):
+        s = s.replace(persian_digits[i], str(i)).replace(arabic_digits[i], str(i))
+    s = s.replace(',', '').replace('،', '').replace(' ', '').replace('_', '')
+    try:
+        val = int(float(s))
+        return max(0, val)
+    except (ValueError, TypeError):
+        return 0
+
+
 @login_required
 def fast_price_update_api(request):
     """
-    AJAX endpoint for Sales & Admin to:
+    Agile AJAX endpoint for Sales & Admin to:
     1. Set Manual price
     2. Switch to Auto-API pricing
     3. Set to 'Call for price' (بدون نرخ / تماس بگیرید)
@@ -277,7 +297,7 @@ def fast_price_update_api(request):
     if request.method == 'POST':
         product_id = request.POST.get('product_id')
         pricing_mode = request.POST.get('pricing_mode', Product.PricingMode.MANUAL)
-        new_price_str = request.POST.get('new_price', '').strip()
+        new_price_raw = request.POST.get('new_price', '').strip()
         note = request.POST.get('note', 'بروزرسانی از پنل مدیریت')
 
         try:
@@ -299,8 +319,10 @@ def fast_price_update_api(request):
                 return JsonResponse({
                     'status': 'success',
                     'mode': 'call',
+                    'product_id': product.id,
                     'display_text': 'تماس بگیرید',
-                    'message': f'محصول «{product.title}» روی وضعیت «تماس بگیرید» تنظیم شد.',
+                    'new_price': 0,
+                    'message': f'کالای «{product.title}» روی وضعیت «تماس بگیرید» تنظیم شد.',
                 })
 
             elif pricing_mode == Product.PricingMode.AUTO_API:
@@ -319,42 +341,49 @@ def fast_price_update_api(request):
                 return JsonResponse({
                     'status': 'success',
                     'mode': 'api',
+                    'product_id': product.id,
                     'display_text': f"{computed_price:,} تومان (API)",
                     'new_price': f"{computed_price:,}",
+                    'raw_price': computed_price,
                     'diff_percent': product.price_diff_percent,
                     'message': f'نرخ «{product.title}» به صورت خودکار از API روی {computed_price:,} تومان همگام شد.',
                 })
 
             else:
                 # Manual pricing
-                if new_price_str:
-                    new_price = int(new_price_str)
-                    if new_price > 0:
-                        product.price_previous = product.price or new_price
-                        product.price = new_price
-                        product.save()
-
-                        PriceHistory.objects.create(
-                            product=product,
-                            price=new_price,
-                            note=f"{note} (توسط {request.user.username})"
-                        )
-
-                        return JsonResponse({
-                            'status': 'success',
-                            'mode': 'manual',
-                            'display_text': f"{new_price:,} تومان",
-                            'new_price': f"{new_price:,}",
-                            'diff_percent': product.price_diff_percent,
-                            'message': f'نرخ دستی «{product.title}» به {new_price:,} تومان بروز شد.',
-                        })
-                else:
+                new_price = _clean_price_input(new_price_raw)
+                if new_price > 0:
+                    product.price_previous = product.price or new_price
+                    product.price = new_price
                     product.save()
+
+                    PriceHistory.objects.create(
+                        product=product,
+                        price=new_price,
+                        note=f"{note} (توسط {request.user.username})"
+                    )
+
                     return JsonResponse({
                         'status': 'success',
                         'mode': 'manual',
-                        'display_text': f"{product.price:,} تومان",
-                        'message': 'تنظیمات ذخیره شد.',
+                        'product_id': product.id,
+                        'display_text': f"{new_price:,} تومان",
+                        'new_price': f"{new_price:,}",
+                        'raw_price': new_price,
+                        'diff_percent': product.price_diff_percent,
+                        'message': f'نرخ دستی «{product.title}» با موفقیت روی {new_price:,} تومان ثبت شد.',
+                    })
+                else:
+                    product.save()
+                    display_p = f"{product.price:,} تومان" if product.price > 0 else "تعیین نشده"
+                    return JsonResponse({
+                        'status': 'success',
+                        'mode': 'manual',
+                        'product_id': product.id,
+                        'display_text': display_p,
+                        'new_price': f"{product.price:,}" if product.price > 0 else "",
+                        'raw_price': product.price,
+                        'message': f'حالت قیمت‌گذاری «{product.title}» به نرخ دستی تغییر یافت.',
                     })
 
         except Exception as e:

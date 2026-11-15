@@ -254,24 +254,249 @@ a {
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 1.25rem;
+  gap: 0.5rem;
   list-style: none;
 }
 
 .nav-link {
   font-size: 0.925rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-main);
-  padding: 0.4rem 0.6rem;
-  border-radius: 6px;
+  padding: 0.5rem 0.85rem;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   gap: 0.35rem;
+  transition: all 0.2s ease;
 }
 
 .nav-link:hover, .nav-link.active {
   color: var(--copper-primary);
   background: var(--copper-light);
+}
+
+/* ========================================================
+   DROPDOWN MEGA-MENU (منوی آبشاری هوشمند و مدرن)
+   ======================================================== */
+.nav-dropdown {
+  position: relative;
+}
+
+.nav-dropdown-trigger {
+  cursor: pointer;
+  user-select: none;
+}
+
+.nav-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: -20px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 5px 15px rgba(0, 0, 0, 0.08);
+  padding: 1.5rem;
+  min-width: 680px;
+  display: none;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  z-index: 120;
+  animation: dropdownAnim 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.nav-dropdown:hover .nav-dropdown-menu,
+.nav-dropdown:focus-within .nav-dropdown-menu {
+  display: grid;
+}
+
+/* Invisible bridge so mouse hovering from trigger to menu doesn't close */
+.nav-dropdown-menu::before {
+  content: '';
+  position: absolute;
+  top: -14px;
+  left: 0;
+  right: 0;
+  height: 14px;
+}
+
+@keyframes dropdownAnim {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.nav-dropdown-category {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 1rem;
+  transition: all 0.2s ease;
+}
+.nav-dropdown-category:hover {
+  border-color: var(--copper-border);
+  box-shadow: var(--card-shadow);
+}
+
+.nav-dropdown-cat-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 0.6rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.nav-dropdown-cat-title:hover {
+  color: var(--copper-primary);
+}
+
+.nav-dropdown-sublinks {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.nav-dropdown-sublink {
+  font-size: 0.825rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+.nav-dropdown-sublink:hover {
+  color: var(--copper-primary);
+  background: var(--copper-light);
+  transform: translateX(-3px);
+}
+
+/* ========================================================
+   AGILE PRICING CONTROLS (کنترل‌های اجایل نرخ‌گذاری ادمین)
+   ======================================================== */
+.pricing-segmented-control {
+  display: inline-flex;
+  background: var(--bg-surface-elevated);
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid var(--border-strong);
+  gap: 3px;
+}
+
+.pricing-segmented-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.775rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
+}
+.pricing-segmented-btn:hover {
+  color: var(--text-main);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .pricing-segmented-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.pricing-segmented-btn.active-manual {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.35);
+}
+
+.pricing-segmented-btn.active-api {
+  background: #16a34a !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(22, 163, 74, 0.35);
+}
+
+.pricing-segmented-btn.active-call {
+  background: #d97706 !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(217, 119, 6, 0.35);
+}
+
+/* Benchmark Bar in Admin */
+.benchmark-banner {
+  background: linear-gradient(135deg, var(--bg-surface-elevated) 0%, var(--bg-surface) 100%);
+  border: 1px solid var(--border-strong);
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  margin-bottom: 1.75rem;
+  box-shadow: var(--card-shadow);
+}
+
+.benchmark-items {
+  display: flex;
+  align-items: center;
+  gap: 1.75rem;
+  flex-wrap: wrap;
+}
+
+.benchmark-col {
+  display: flex;
+  flex-direction: column;
+}
+.benchmark-col span {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+.benchmark-col strong {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+/* TOAST NOTIFICATION */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.toast-message {
+  pointer-events: auto;
+  background: var(--bg-surface);
+  color: var(--text-main);
+  border-right: 4px solid var(--copper-primary);
+  border-radius: 10px;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+  padding: 0.85rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px solid var(--border-strong);
+  animation: toastSlide 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes toastSlide {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 .header-actions {

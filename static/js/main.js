@@ -168,74 +168,317 @@ document.addEventListener('DOMContentLoaded', function () {
     updateCalculatorShapeFields();
   }
 
-  // 4. FAST INLINE PRICE UPDATE (For Sales & Admin Portal)
+  // ==========================================
+  // 4. CSRF & TOAST NOTIFICATION UTILITIES
+  // ==========================================
+  function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    if (meta && meta.content) return meta.content;
+    const cookie = document.cookie.split('; ').find(row => row.startsWith('csrftoken='));
+    return cookie ? cookie.split('=')[1] : '';
+  }
+
+  window.showToast = function(message, type = 'success') {
+    let container = document.getElementById('toast-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'toast-container';
+      container.className = 'toast-container';
+      document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `toast-message ${type}`;
+
+    let iconSvg = '';
+    if (type === 'success') {
+      iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+    } else if (type === 'error') {
+      iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
+    } else {
+      iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+    }
+
+    toast.innerHTML = `
+      ${iconSvg}
+      <span style="flex:1;">${message}</span>
+      <button type="button" style="background:none; border:none; color:inherit; cursor:pointer; opacity:0.6; font-size:1.1rem; padding:0; line-height:1; margin-right:0.4rem;" onclick="this.parentElement.remove()">✕</button>
+    `;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(12px)';
+      toast.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+      setTimeout(() => toast.remove(), 300);
+    }, 3800);
+  };
+
+  // ==========================================
+  // 5. AGILE PRICING WORKFLOW (ONE-CLICK)
+  // ==========================================
+  function updatePriceStatusDisplay(prodId, mode, displayText, rawPrice) {
+    const statusContainer = document.getElementById(`price-status-${prodId}`);
+    if (statusContainer) {
+      if (mode === 'call') {
+        statusContainer.innerHTML = `
+          <span class="badge-change neutral" style="background:var(--warning-bg); color:var(--warning-color); font-weight:800;">
+            📞 تماس بگیرید
+          </span>
+        `;
+      } else if (mode === 'api') {
+        statusContainer.innerHTML = `
+          <div style="display:flex; flex-direction:column;">
+            <strong style="color:var(--copper-primary); font-size:1rem;">${displayText}</strong>
+            <span style="font-size:0.7rem; color:var(--success-color); font-weight:700;">✓ وب‌سرویس زنده بورس</span>
+          </div>
+        `;
+      } else {
+        statusContainer.innerHTML = `
+          <div style="display:flex; flex-direction:column;">
+            <strong style="color:var(--text-main); font-size:1rem;">${displayText}</strong>
+            <span style="font-size:0.7rem; color:#2563eb; font-weight:600;">نرخ دستی کارشناس</span>
+          </div>
+        `;
+      }
+    }
+
+    // Update row attribute for instant filtering
+    const row = document.getElementById(`row-prod-${prodId}`);
+    if (row) {
+      row.setAttribute('data-mode', mode);
+    }
+
+    // Update manual box accessibility
+    const manualBox = document.getElementById(`manual-box-${prodId}`);
+    const inputPrice = document.getElementById(`input-price-${prodId}`);
+    if (manualBox && inputPrice) {
+      if (mode === 'manual') {
+        manualBox.style.opacity = '1';
+        manualBox.style.pointerEvents = 'auto';
+        inputPrice.disabled = false;
+        if (rawPrice && rawPrice > 0) {
+          inputPrice.value = rawPrice;
+        }
+      } else {
+        manualBox.style.opacity = '0.35';
+        manualBox.style.pointerEvents = 'none';
+        inputPrice.disabled = true;
+      }
+    }
+  }
+
+  function sendAgilePriceUpdate(prodId, mode, newPrice = null, callback = null) {
+    const csrfToken = getCsrfToken();
+    const formData = new FormData();
+    formData.append('product_id', prodId);
+    formData.append('pricing_mode', mode);
+    if (newPrice !== null && newPrice !== undefined) {
+      formData.append('new_price', newPrice);
+    }
+
+    fetch('/management/fast-price-update/', {
+      method: 'POST',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRFToken': csrfToken
+      },
+      body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === 'success') {
+        updatePriceStatusDisplay(prodId, data.mode, data.new_price ? `${data.new_price} تومان` : data.display_text, data.raw_price);
+        showToast(data.message, 'success');
+        if (callback) callback(null, data);
+      } else {
+        showToast('خطا: ' + (data.message || 'عملیات ناموفق بود'), 'error');
+        if (callback) callback(data.message);
+      }
+    })
+    .catch(err => {
+      showToast('خطای ارتباط با سرور. لطفاً مجدداً تلاش فرمایید.', 'error');
+      if (callback) callback(err);
+    });
+  }
+
+  // Segmented Mode Switcher (One-Click)
+  const modeSwitchBtns = document.querySelectorAll('.btn-mode-switch');
+  modeSwitchBtns.forEach(btn => {
+    btn.addEventListener('click', function () {
+      const prodId = this.getAttribute('data-prod-id');
+      const targetMode = this.getAttribute('data-mode');
+      const parentControl = this.closest('.pricing-segmented-control');
+
+      if (!parentControl) return;
+
+      // Optimistic UI toggle
+      parentControl.querySelectorAll('.btn-mode-switch').forEach(b => {
+        b.classList.remove('active-manual', 'active-api', 'active-call');
+      });
+      this.classList.add(`active-${targetMode}`);
+
+      // Manual input focus if manual
+      const inputPrice = document.getElementById(`input-price-${prodId}`);
+      let currentPriceVal = null;
+      if (targetMode === 'manual' && inputPrice && inputPrice.value) {
+        currentPriceVal = inputPrice.value;
+      }
+
+      sendAgilePriceUpdate(prodId, targetMode, currentPriceVal, (err) => {
+        if (!err && targetMode === 'manual' && inputPrice) {
+          inputPrice.focus();
+        }
+      });
+    });
+  });
+
+  // Save Manual Price (Submit Button)
+  const saveManualBtns = document.querySelectorAll('.btn-save-manual');
+  saveManualBtns.forEach(btn => {
+    btn.addEventListener('click', function () {
+      const prodId = this.getAttribute('data-prod-id');
+      const input = document.getElementById(`input-price-${prodId}`);
+      if (!input || !input.value.trim()) {
+        showToast('لطفاً نرخ جدید را به تومان وارد فرمایید.', 'warning');
+        if (input) input.focus();
+        return;
+      }
+      const originalText = this.innerText;
+      this.innerText = '...';
+      this.disabled = true;
+
+      sendAgilePriceUpdate(prodId, 'manual', input.value.trim(), () => {
+        this.innerText = originalText;
+        this.disabled = false;
+      });
+    });
+  });
+
+  // Enter key on agile price input
+  const agileInputs = document.querySelectorAll('.agile-price-input');
+  agileInputs.forEach(input => {
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const prodId = this.getAttribute('data-prod-id');
+        if (!this.value.trim()) {
+          showToast('لطفاً نرخ جدید را وارد فرمایید.', 'warning');
+          return;
+        }
+        sendAgilePriceUpdate(prodId, 'manual', this.value.trim());
+      }
+    });
+  });
+
+  // Quick Step Buttons (+5k / -5k)
+  const quickStepBtns = document.querySelectorAll('.btn-quick-step');
+  quickStepBtns.forEach(btn => {
+    btn.addEventListener('click', function () {
+      const prodId = this.getAttribute('data-prod-id');
+      const step = parseInt(this.getAttribute('data-step'), 10) || 0;
+      const input = document.getElementById(`input-price-${prodId}`);
+      if (!input) return;
+
+      let currentVal = parseInt(input.value.replace(/[^0-9]/g, ''), 10) || 0;
+      let nextVal = Math.max(0, currentVal + step);
+      input.value = nextVal;
+
+      // Make segmented button active-manual if not already
+      const parentRow = document.getElementById(`row-prod-${prodId}`);
+      if (parentRow) {
+        const segControl = parentRow.querySelector('.pricing-segmented-control');
+        if (segControl) {
+          segControl.querySelectorAll('.btn-mode-switch').forEach(b => {
+            b.classList.remove('active-manual', 'active-api', 'active-call');
+            if (b.getAttribute('data-mode') === 'manual') {
+              b.classList.add('active-manual');
+            }
+          });
+        }
+      }
+
+      sendAgilePriceUpdate(prodId, 'manual', nextVal);
+    });
+  });
+
+  // Client-Side Search and Mode Filtering
+  const searchInput = document.getElementById('admin-product-search');
+  const filterChips = document.querySelectorAll('.pricing-filter-chip');
+  let currentFilterMode = 'all';
+
+  function filterPricingTable() {
+    const searchTerm = (searchInput ? searchInput.value : '').toLowerCase().trim();
+    const rows = document.querySelectorAll('.pricing-row');
+
+    rows.forEach(row => {
+      const rowTitle = (row.getAttribute('data-title') || '').toLowerCase();
+      const rowMode = row.getAttribute('data-mode') || 'manual';
+
+      const matchesSearch = !searchTerm || rowTitle.includes(searchTerm);
+      const matchesFilter = currentFilterMode === 'all' || rowMode === currentFilterMode;
+
+      if (matchesSearch && matchesFilter) {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+      }
+    });
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener('input', filterPricingTable);
+  }
+
+  filterChips.forEach(chip => {
+    chip.addEventListener('click', function () {
+      filterChips.forEach(c => c.classList.remove('active'));
+      this.classList.add('active');
+      currentFilterMode = this.getAttribute('data-filter') || 'all';
+      filterPricingTable();
+    });
+  });
+
+  // 6. LEGACY FAST INLINE PRICE UPDATE (For any inline forms)
   const fastPriceForms = document.querySelectorAll('.fast-price-form');
   fastPriceForms.forEach(form => {
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       const formData = new FormData(this);
       const btn = this.querySelector('button[type="submit"]');
-      const originalText = btn.innerText;
-      btn.innerText = '...';
-      btn.disabled = true;
+      const originalText = btn ? btn.innerText : 'ثبت';
+      if (btn) {
+        btn.innerText = '...';
+        btn.disabled = true;
+      }
 
       fetch('/management/fast-price-update/', {
         method: 'POST',
         headers: {
-          'X-Requested-With': 'XMLHttpRequest'
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': getCsrfToken()
         },
         body: formData
       })
       .then(res => res.json())
       .then(data => {
-        btn.innerText = originalText;
-        btn.disabled = false;
+        if (btn) {
+          btn.innerText = originalText;
+          btn.disabled = false;
+        }
         if (data.status === 'success') {
-          const prodId = formData.get('product_id');
-          const statusContainer = document.getElementById(`price-status-${prodId}`);
-          
-          if (statusContainer) {
-            if (data.mode === 'call') {
-              statusContainer.innerHTML = `
-                <span class="badge-change neutral" style="background:var(--warning-bg); color:var(--warning-color); font-weight:800;">
-                  📞 تماس بگیرید
-                </span>
-              `;
-            } else if (data.mode === 'api') {
-              statusContainer.innerHTML = `
-                <div style="display:flex; flex-direction:column;">
-                  <strong style="color:var(--copper-primary); font-size:0.95rem;">${data.new_price} تومان</strong>
-                  <span style="font-size:0.7rem; color:var(--success-color);">✓ متصل به وب‌سرویس</span>
-                </div>
-              `;
-            } else {
-              statusContainer.innerHTML = `
-                <div style="display:flex; flex-direction:column;">
-                  <strong style="color:var(--text-main); font-size:0.95rem;">${data.new_price} تومان</strong>
-                  <span style="font-size:0.7rem; color:var(--text-muted);">نرخ دستی کارشناس</span>
-                </div>
-              `;
-            }
-          }
-
-          // Inline subtle notification
-          const notif = document.createElement('span');
-          notif.innerText = '✓ ذخیره شد';
-          notif.style.color = '#16a34a';
-          notif.style.fontSize = '0.75rem';
-          notif.style.fontWeight = '700';
-          notif.style.marginRight = '0.4rem';
-          btn.parentNode.appendChild(notif);
-          setTimeout(() => { notif.remove(); }, 2500);
-
+          showToast(data.message, 'success');
         } else {
-          alert('خطا: ' + (data.message || 'خطایی رخ داد'));
+          showToast('خطا: ' + (data.message || 'خطایی رخ داد'), 'error');
         }
       })
       .catch(err => {
-        btn.innerText = originalText;
-        btn.disabled = false;
-        alert('خطای اتصال به سرور');
+        if (btn) {
+          btn.innerText = originalText;
+          btn.disabled = false;
+        }
+        showToast('خطای اتصال به سرور', 'error');
       });
     });
   });

@@ -19,6 +19,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   
+  <!-- CSRF Token for Secure AJAX Requests -->
+  <meta name="csrf-token" content="{{ csrf_token }}">
+
   <!-- CSS Stylesheet -->
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
   {% block extra_head %}{% endblock %}
@@ -36,13 +39,18 @@
         {% for prod in ticker_products %}
           <div class="ticker-item">
             <span class="name">{{ prod.title }}</span>
-            <span class="price">{{ prod.price|intcomma }} تومان</span>
-            {% if prod.is_price_up %}
-              <span class="badge-change up">▲ +{{ prod.price_diff_percent }}%</span>
-            {% elif prod.is_price_down %}
-              <span class="badge-change down">▼ {{ prod.price_diff_percent }}%</span>
+            {% if prod.is_call_for_price %}
+              <span class="price" style="color:var(--bronze-accent); font-weight:800;">تماس بگیرید</span>
+              <span class="badge-change neutral">استعلام روز</span>
             {% else %}
-              <span class="badge-change neutral">۰٪</span>
+              <span class="price">{{ prod.price|intcomma }} تومان</span>
+              {% if prod.is_price_up %}
+                <span class="badge-change up">▲ +{{ prod.price_diff_percent }}%</span>
+              {% elif prod.is_price_down %}
+                <span class="badge-change down">▼ {{ prod.price_diff_percent }}%</span>
+              {% else %}
+                <span class="badge-change neutral">۰٪</span>
+              {% endif %}
             {% endif %}
           </div>
         {% empty %}
@@ -89,19 +97,74 @@
         </div>
       </a>
 
-      <!-- Main Navigation -->
-      <ul class="nav-links">
-        <li><a href="{% url 'market:home' %}" class="nav-link">صفحه اصلی</a></li>
-        <li><a href="{% url 'market:product_list' %}" class="nav-link">کاتالوگ و قیمت‌ها</a></li>
-        <li><a href="{% url 'market:category_products' 'copper' %}" class="nav-link">بازار مس</a></li>
-        <li><a href="{% url 'market:category_products' 'aluminum' %}" class="nav-link">آلومینیوم</a></li>
-        <li><a href="{% url 'market:category_products' 'steel' %}" class="nav-link">آهن و فولاد</a></li>
-        <li><a href="{% url 'news:news_list' %}" class="nav-link">اخبار و تحلیل بورس کالا</a></li>
-        <li><a href="{% url 'market:inquiry_create' %}" class="nav-link" style="color:var(--copper-primary); font-weight:700;">ثبت استعلام پیش‌فاکتور</a></li>
-      </ul>
+      <!-- Main Navigation with Elegant Dropdown Mega-Menu -->
+      <nav>
+        <ul class="nav-links">
+          <li>
+            <a href="{% url 'market:home' %}" class="nav-link">صفحه اصلی</a>
+          </li>
 
-      <!-- Header Actions: Theme Toggle & User Auth -->
+          <!-- Market Categories Dropdown Mega-Menu -->
+          <li class="nav-dropdown">
+            <a href="{% url 'market:product_list' %}" class="nav-link nav-dropdown-trigger">
+              <span>بازار و قیمت فلزات</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </a>
+
+            <!-- Dropdown Menu Content -->
+            <div class="nav-dropdown-menu">
+              {% for cat in nav_categories %}
+                <div class="nav-dropdown-category">
+                  <a href="{% url 'market:category_products' cat.slug %}" class="nav-dropdown-cat-title">
+                    <span style="color:var(--copper-primary);">●</span>
+                    <span>{{ cat.name }}</span>
+                  </a>
+                  <ul class="nav-dropdown-sublinks">
+                    {% for sub in cat.subcategories.all|slice:":4" %}
+                      <li>
+                        <a href="{% url 'market:subcategory_products' sub.slug %}" class="nav-dropdown-sublink">
+                          <span>›</span>
+                          <span>{{ sub.name }}</span>
+                        </a>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endfor %}
+              
+              <div style="grid-column: span 2; border-top: 1px solid var(--border-subtle); padding-top: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.8rem; color: var(--text-muted);">تأمین مستقیم انواع کاتد، شمش و مقاطع استاندارد</span>
+                <a href="{% url 'market:product_list' %}" style="font-size: 0.825rem; font-weight: 700; color: var(--copper-primary);">
+                  مشاهده کل کاتالوگ و مقاطع فلزی ←
+                </a>
+              </div>
+            </div>
+          </li>
+
+          <li>
+            <a href="{% url 'market:home' %}#calculator-section" class="nav-link">
+              <span>محاسبه‌گر وزن فلزات</span>
+            </a>
+          </li>
+
+          <li>
+            <a href="{% url 'news:news_list' %}" class="nav-link">اخبار و تحلیل بورس</a>
+          </li>
+
+          <li>
+            <a href="{% url 'market:inquiry_create' %}" class="nav-link">پیگیری استعلام</a>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- Header Actions: CTA, Theme Toggle & User Auth -->
       <div class="header-actions">
+        <!-- Prominent RFQ CTA -->
+        <a href="{% url 'market:inquiry_create' %}" class="btn btn-primary btn-sm" style="box-shadow: 0 2px 8px rgba(194, 94, 46, 0.35);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+          <span>استعلام پیش‌فاکتور</span>
+        </a>
+
         <!-- Theme Toggle -->
         <button id="theme-toggle-btn" class="btn-theme-toggle" title="تغییر قالب روز / شب">
           <span id="theme-icon">
@@ -115,14 +178,14 @@
           <!-- Logged-in Dropdown / Dashboard -->
           {% if user.is_admin_role or user.is_sales_role or user.is_content_role %}
             <a href="{% url 'market:management_dashboard' %}" class="btn btn-secondary btn-sm" style="border-color:var(--copper-primary); color:var(--copper-primary);">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-              <span>پنل مدیریت و قیمت‌ها</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+              <span>میز مدیریت</span>
             </a>
           {% endif %}
 
-          <a href="{% url 'market:dashboard' %}" class="btn btn-outline-copper btn-sm">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-            <span>میز کاربری ({{ user.username }})</span>
+          <a href="{% url 'market:dashboard' %}" class="btn btn-secondary btn-sm">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            <span>{{ user.username }}</span>
           </a>
 
           <a href="{% url 'accounts:logout' %}" class="btn btn-secondary btn-sm" title="خروج از حساب">
@@ -130,34 +193,11 @@
           </a>
         {% else %}
           <!-- Guest: Login / Register -->
-          <a href="{% url 'accounts:login' %}" class="btn btn-secondary btn-sm">ورود خریداران</a>
-          <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-sm">ثبت‌نام</a>
+          <a href="{% url 'accounts:login' %}" class="btn btn-secondary btn-sm">ورود / ثبت‌نام</a>
         {% endif %}
       </div>
 
     </div>
-
-    <!-- Secondary Clean Subnav for Categories -->
-    <nav class="category-subnav">
-      <div class="container">
-        <ul class="category-subnav-list">
-          <li class="category-subnav-item"><strong style="color:var(--copper-primary); font-size:0.85rem;">دسته‌بندی فلزات:</strong></li>
-          {% for cat in nav_categories %}
-            <li class="category-subnav-item">
-              <a href="{% url 'market:category_products' cat.slug %}">
-                <span>{{ cat.name }}</span>
-              </a>
-            </li>
-          {% endfor %}
-          <li class="category-subnav-item" style="margin-right:auto;">
-            <a href="{% url 'market:home' %}#calculator-section" style="color:var(--bronze-accent);">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="16" y1="14" x2="16" y2="18"></line><path d="M8 10h.01"></path><path d="M12 10h.01"></path><path d="M16 10h.01"></path><path d="M8 14h.01"></path><path d="M12 14h.01"></path><path d="M8 18h.01"></path><path d="M12 18h.01"></path></svg>
-              <span>محاسبه‌گر آنلاین وزن و بهای فلز</span>
-            </a>
-          </li>
-        </ul>
-      </div>
-    </nav>
   </header>
 
   <!-- ================= FLASH MESSAGES ================= -->
@@ -249,6 +289,9 @@
       </div>
     </div>
   </footer>
+
+  <!-- Toast Notifications Container -->
+  <div id="toast-container" class="toast-container"></div>
 
   <!-- Main JavaScript File -->
   <script src="{% static 'js/main.js' %}"></script>
