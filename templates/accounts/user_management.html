@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% load static humanize %}
+
+{% block title %}مدیریت کاربران و حقوق دسترسی (RBAC) | {{ brand_name }}{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top:1.5rem;">
+  <div class="container">
+    
+    <!-- Top Header -->
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">
+      <div>
+        <h1 style="font-size:1.6rem; font-weight:900; color:var(--text-main);">
+          مدیریت کاربران و سطوح دسترسی سازمانی (Permissions & RBAC)
+        </h1>
+        <p style="font-size:0.875rem; color:var(--text-muted); margin-top:0.25rem;">
+          تنظیم حقوق دسترسی کارمندان، کارشناسان فروش، خبرنگاران و مشتریان سامانه فلز آنلاین
+        </p>
+      </div>
+
+      <div style="display:flex; gap:0.75rem;">
+        <a href="{% url 'market:management_dashboard' %}" class="btn btn-secondary btn-sm">
+          ← بازگشت به داشبورد مدیریت
+        </a>
+        <a href="/admin/accounts/user/" class="btn btn-primary btn-sm" target="_blank">
+          <span>مدیریت پیشرفته در پنل جنگو</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Permissions Explanatory Guide Box -->
+    <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:12px; padding:1.25rem; margin-bottom:2rem;">
+      <h3 style="font-size:1rem; font-weight:800; color:var(--text-main); margin-bottom:0.75rem; display:flex; align-items:center; gap:0.4rem;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--copper-primary)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        <span>راهنمای سطوح دسترسی و حقوق کاربری (Role-Based Access Control)</span>
+      </h3>
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:1rem; font-size:0.825rem;">
+        <div style="background:var(--bg-surface-elevated); padding:0.75rem; border-radius:8px; border-right:3px solid var(--danger-color);">
+          <strong style="color:var(--danger-color);">👑 مدیر ارشد سیستم (Admin)</strong>
+          <p style="color:var(--text-muted); margin-top:0.25rem;">دسترسی نامحدود به کلیه بخش‌ها، مدیریت کاربران، تغییر پرمیشن‌ها، گزارشات مالی و دیتابیس.</p>
+        </div>
+        <div style="background:var(--bg-surface-elevated); padding:0.75rem; border-radius:8px; border-right:3px solid var(--copper-primary);">
+          <strong style="color:var(--copper-primary);">💼 کارشناس فروش (Sales)</strong>
+          <p style="color:var(--text-muted); margin-top:0.25rem;">دسترسی به بروزرسانی نرخ‌های روزانه در تابلو، بررسی استعلامات، صدور پیش‌فاکتور و تغییر وضعیت سفارش.</p>
+        </div>
+        <div style="background:var(--bg-surface-elevated); padding:0.75rem; border-radius:8px; border-right:3px solid var(--info-color);">
+          <strong style="color:var(--info-color);">✍️ کارشناس محتوا (Content Editor)</strong>
+          <p style="color:var(--text-muted); margin-top:0.25rem;">ایجاد و انتشار گزارش‌های تحلیلی بورس کالا، بازار جهانی مس و اخبار فلزات اساسی بدون دسترسی مالی.</p>
+        </div>
+        <div style="background:var(--bg-surface-elevated); padding:0.75rem; border-radius:8px; border-right:3px solid var(--success-color);">
+          <strong style="color:var(--success-color);">🏭 خریدار / مشتری (Customer)</strong>
+          <p style="color:var(--text-muted); margin-top:0.25rem;">ثبت استعلام، مشاهده و چاپ پیش‌فاکتور، رهگیری وضعیت سفارش و اطلاعات پروفایل خود.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap:1rem; margin-bottom:2rem;">
+      <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:10px; padding:1rem; text-align:center;">
+        <div style="font-size:1.5rem; font-weight:800; color:var(--text-main);">{{ stats.total }}</div>
+        <div style="font-size:0.8rem; color:var(--text-muted);">کل کاربران سایت</div>
+      </div>
+      <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:10px; padding:1rem; text-align:center;">
+        <div style="font-size:1.5rem; font-weight:800; color:var(--danger-color);">{{ stats.admins }}</div>
+        <div style="font-size:0.8rem; color:var(--text-muted);">مدیران سیستم</div>
+      </div>
+      <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:10px; padding:1rem; text-align:center;">
+        <div style="font-size:1.5rem; font-weight:800; color:var(--copper-primary);">{{ stats.sales }}</div>
+        <div style="font-size:0.8rem; color:var(--text-muted);">کارشناسان فروش</div>
+      </div>
+      <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:10px; padding:1rem; text-align:center;">
+        <div style="font-size:1.5rem; font-weight:800; color:var(--info-color);">{{ stats.content }}</div>
+        <div style="font-size:0.8rem; color:var(--text-muted);">کارشناسان محتوا</div>
+      </div>
+      <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:10px; padding:1rem; text-align:center;">
+        <div style="font-size:1.5rem; font-weight:800; color:var(--success-color);">{{ stats.customers }}</div>
+        <div style="font-size:0.8rem; color:var(--text-muted);">خریداران و مشتریان</div>
+      </div>
+    </div>
+
+    <!-- Users Table with Search & Filter -->
+    <div class="table-container">
+      <div style="padding:1.25rem; border-bottom:1px solid var(--border-subtle); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem;">
+        
+        <!-- Search -->
+        <form method="get" style="display:flex; align-items:center; gap:0.5rem;">
+          <input type="text" name="q" value="{{ search_query }}" placeholder="جستجوی نام، موبایل، شرکت..." class="form-input" style="width:240px; padding:0.4rem 0.75rem;">
+          <button type="submit" class="btn btn-secondary btn-sm">جستجو</button>
+        </form>
+
+        <!-- Role Filter Tabs -->
+        <div style="display:flex; gap:0.4rem;">
+          <a href="{% url 'accounts:user_management' %}" class="btn btn-secondary btn-sm {% if not role_filter %}active{% endif %}">همه</a>
+          <a href="{% url 'accounts:user_management' %}?role=admin" class="btn btn-secondary btn-sm {% if role_filter == 'admin' %}active{% endif %}">مدیران</a>
+          <a href="{% url 'accounts:user_management' %}?role=sales" class="btn btn-secondary btn-sm {% if role_filter == 'sales' %}active{% endif %}">فروش</a>
+          <a href="{% url 'accounts:user_management' %}?role=content" class="btn btn-secondary btn-sm {% if role_filter == 'content' %}active{% endif %}">محتوا</a>
+          <a href="{% url 'accounts:user_management' %}?role=customer" class="btn btn-secondary btn-sm {% if role_filter == 'customer' %}active{% endif %}">مشتریان</a>
+        </div>
+      </div>
+
+      <table class="price-table">
+        <thead>
+          <tr>
+            <th>نام کاربری</th>
+            <th>نام و نام‌خانوادگی / شرکت</th>
+            <th>شماره همراه</th>
+            <th>نقش فعلی (پرمیشن)</th>
+            <th>وضعیت حساب</th>
+            <th>تأیید مدارک</th>
+            <th>تاریخ عضویت</th>
+            <th>تغییر حقوق دسترسی</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in user_list %}
+            <tr>
+              <td><strong style="color:var(--text-main);" dir="ltr">{{ u.username }}</strong></td>
+              <td>
+                <span class="product-cell-title">{{ u.get_full_name|default:u.username }}</span>
+                {% if u.company_name %}
+                  <span class="product-cell-sub">{{ u.company_name }}</span>
+                {% endif %}
+              </td>
+              <td><span dir="ltr">{{ u.phone_number|default:"-" }}</span></td>
+              <td>
+                {% if u.role == 'admin' %}
+                  <span style="background:var(--danger-bg); color:var(--danger-color); font-size:0.75rem; font-weight:700; padding:0.2rem 0.5rem; border-radius:4px;">مدیر ارشد</span>
+                {% elif u.role == 'sales' %}
+                  <span style="background:var(--copper-light); color:var(--copper-primary); font-size:0.75rem; font-weight:700; padding:0.2rem 0.5rem; border-radius:4px;">کارشناس فروش</span>
+                {% elif u.role == 'content' %}
+                  <span style="background:var(--info-bg); color:var(--info-color); font-size:0.75rem; font-weight:700; padding:0.2rem 0.5rem; border-radius:4px;">کارشناس محتوا</span>
+                {% else %}
+                  <span style="background:var(--success-bg); color:var(--success-color); font-size:0.75rem; font-weight:700; padding:0.2rem 0.5rem; border-radius:4px;">مشتری / خریدار</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if u.is_active %}
+                  <span style="color:var(--success-color); font-size:0.8rem; font-weight:700;">● فعال</span>
+                {% else %}
+                  <span style="color:var(--danger-color); font-size:0.8rem; font-weight:700;">مسدود</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if u.is_verified %}
+                  <span style="color:var(--success-color); font-size:0.8rem;">✓ تأیید شده</span>
+                {% else %}
+                  <span style="color:var(--text-light); font-size:0.8rem;">عادی</span>
+                {% endif %}
+              </td>
+              <td><span style="font-size:0.8rem; color:var(--text-muted);">{{ u.date_joined|date:"Y/m/d" }}</span></td>
+              <td>
+                <a href="{% url 'accounts:user_edit_role' u.id %}" class="btn btn-secondary btn-sm" style="border-color:var(--copper-primary); color:var(--copper-primary);">
+                  ویرایش دسترسی
+                </a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="8" style="text-align:center; padding:2rem;">کاربری یافت نشد.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

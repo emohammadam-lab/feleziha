@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}پروفایل و اطلاعات حقوقی | {{ brand_name }}{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top:2rem;">
+  <div class="container" style="max-width:720px;">
+    
+    <div style="margin-bottom:1.75rem; display:flex; align-items:center; justify-content:space-between;">
+      <div>
+        <h1 style="font-size:1.6rem; font-weight:900; color:var(--text-main);">
+          پروفایل کاربری و شناسه مودیان مالیاتی
+        </h1>
+        <p style="font-size:0.875rem; color:var(--text-muted);">
+          اطلاعات این بخش جهت صدور فاکتور رسمی مالیاتی و ارسال به کارتابل مودیان استفاده می‌شود.
+        </p>
+      </div>
+      <a href="{% url 'market:dashboard' %}" class="btn btn-secondary btn-sm">
+        ← بازگشت به میز کاربری
+      </a>
+    </div>
+
+    <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:16px; padding:2rem; box-shadow:var(--card-shadow);">
+      
+      <form method="post">
+        {% csrf_token %}
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+          <div class="form-group">
+            <label class="form-label">نام</label>
+            {{ form.first_name }}
+          </div>
+          <div class="form-group">
+            <label class="form-label">نام خانوادگی</label>
+            {{ form.last_name }}
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+          <div class="form-group">
+            <label class="form-label">شماره همراه</label>
+            {{ form.phone_number }}
+          </div>
+          <div class="form-group">
+            <label class="form-label">پست الکترونیکی (ایمیل)</label>
+            {{ form.email }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">نام ثبتی شرکت / بنگاه تجاری</label>
+          {{ form.company_name }}
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+          <div class="form-group">
+            <label class="form-label">شناسه ملی / کد ملی</label>
+            {{ form.national_id }}
+          </div>
+          <div class="form-group">
+            <label class="form-label">کد اقتصادی (برای فاکتور رسمی)</label>
+            {{ form.economic_code }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">کد پستی ۱۰ رقمی</label>
+          {{ form.postal_code }}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">نشانی کارخانه، انبار یا دفتر مرکزی</label>
+          {{ form.address }}
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg" style="width:100%; margin-top:1rem;">
+          <span>ذخیره و بروزرسانی اطلاعات</span>
+        </button>
+
+      </form>
+
+    </div>
+
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}انتشار خبر و تحلیل بازار مس و فلزات | {{ brand_name }}{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top:2rem;">
+  <div class="container" style="max-width:760px;">
+    
+    <div style="margin-bottom:1.5rem; display:flex; align-items:center; justify-content:space-between;">
+      <div>
+        <h1 style="font-size:1.6rem; font-weight:900; color:var(--text-main);">
+          انتشار خبر و گزارش تحلیلی بورس کالا
+        </h1>
+        <p style="font-size:0.875rem; color:var(--text-muted);">
+          نویسنده: <strong>{{ user.get_full_name|default:user.username }}</strong> • دسترسی: کارشناس محتوا / مدیر
+        </p>
+      </div>
+      <a href="{% url 'news:news_list' %}" class="btn btn-secondary btn-sm">
+        ← بازگشت به اخبار
+      </a>
+    </div>
+
+    <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:16px; padding:2rem; box-shadow:var(--card-shadow);">
+      
+      <form method="post">
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label class="form-label">تیتر اصلی خبر *</label>
+          <input type="text" name="title" class="form-input" placeholder="مثال: جهش حجم معاملات کاتد مس در تالار صنعتی بورس کالا" required>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+          <div class="form-group">
+            <label class="form-label">حوزه خبری / دسته‌بندی *</label>
+            <select name="category" class="form-select" required>
+              {% for cat in categories %}
+                <option value="{{ cat.id }}">{{ cat.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">منبع موثق خبر *</label>
+            <input type="text" name="source" class="form-input" value="پایگاه تحلیلی بورس کالای ایران (IME)" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">برچسب موضوعی (Badge روی کارت)</label>
+          <input type="text" name="image_badge" class="form-input" value="تحلیل بازار">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">خلاصه / روتیتر خبر *</label>
+          <textarea name="summary" class="form-input" rows="3" placeholder="چکیده ۲ الی ۳ خطی از مهم‌ترین آمار و ارقام خبر" required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">متن کامل خبر و تحلیل *</label>
+          <textarea name="content" class="form-input" rows="10" placeholder="متن تحلیلی همراه با داده‌های رسمی، جدول و نقل قول‌ها..." required></textarea>
+        </div>
+
+        <div style="margin:1rem 0;">
+          <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+            <input type="checkbox" name="is_breaking">
+            <span style="font-size:0.9rem; font-weight:700; color:var(--copper-primary);">نمایش به عنوان «خبر فوری / برگزیده» در صفحه نخست و بالای اخبار</span>
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg" style="width:100%; margin-top:1rem;">
+          <span>انتشار رسمی در سایت</span>
+        </button>
+
+      </form>
+
+    </div>
+
+  </div>
+</section>
+{% endblock %}

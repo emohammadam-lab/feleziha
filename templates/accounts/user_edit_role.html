@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}ویرایش نقش کاربر: {{ target_user.username }} | {{ brand_name }}{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top:2rem;">
+  <div class="container" style="max-width:600px;">
+    
+    <div style="margin-bottom:1.5rem; display:flex; align-items:center; justify-content:space-between;">
+      <div>
+        <h1 style="font-size:1.5rem; font-weight:900; color:var(--text-main);">
+          ویرایش نقش و حقوق دسترسی
+        </h1>
+        <p style="font-size:0.875rem; color:var(--text-muted);">
+          کاربر: <strong>{{ target_user.get_full_name|default:target_user.username }}</strong> ({{ target_user.phone_number|default:target_user.email }})
+        </p>
+      </div>
+      <a href="{% url 'accounts:user_management' %}" class="btn btn-secondary btn-sm">
+        ← بازگشت به لیست کاربران
+      </a>
+    </div>
+
+    <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:16px; padding:2rem; box-shadow:var(--card-shadow);">
+      
+      <form method="post">
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label class="form-label">نقش کاربری (سطح دسترسی) *</label>
+          <select name="role" class="form-select" required>
+            {% for choice_val, choice_lbl in role_choices %}
+              <option value="{{ choice_val }}" {% if target_user.role == choice_val %}selected{% endif %}>
+                {{ choice_lbl }}
+              </option>
+            {% endfor %}
+          </select>
+          <span class="form-help">
+            با تغییر نقش به مدیر یا کارشناس فروش/محتوا، دسترسی بخش مدیریت برای این کاربر فعال می‌گردد.
+          </span>
+        </div>
+
+        <div style="margin:1.5rem 0; display:flex; flex-direction:column; gap:0.75rem;">
+          <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+            <input type="checkbox" name="is_active" {% if target_user.is_active %}checked{% endif %}>
+            <span style="font-size:0.9rem; font-weight:600;">حساب کاربری فعال باشد (مجاز به ورود)</span>
+          </label>
+
+          <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+            <input type="checkbox" name="is_verified" {% if target_user.is_verified %}checked{% endif %}>
+            <span style="font-size:0.9rem; font-weight:600;">تأیید مدارک رسمی و احراز هویت شرکتی</span>
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg" style="width:100%; margin-top:1rem;">
+          <span>ذخیره تغییرات دسترسی</span>
+        </button>
+
+      </form>
+
+    </div>
+
+  </div>
+</section>
+{% endblock %}

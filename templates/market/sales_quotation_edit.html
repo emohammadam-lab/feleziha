@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% load static humanize %}
+
+{% block title %}تعیین قیمت و صدور پیش‌فاکتور - {{ order.tracking_code }}{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top:2rem;">
+  <div class="container" style="max-width:760px;">
+    
+    <div style="margin-bottom:1.5rem; display:flex; align-items:center; justify-content:space-between;">
+      <div>
+        <h1 style="font-size:1.6rem; font-weight:900; color:var(--text-main);">
+          بررسی و صدور پیش‌فاکتور: {{ order.tracking_code }}
+        </h1>
+        <p style="font-size:0.875rem; color:var(--text-muted);">
+          درخواست خریدار: <strong>{{ order.customer_name }}</strong> (تلفن: {{ order.customer_phone }})
+        </p>
+      </div>
+      <a href="{% url 'market:management_dashboard' %}" class="btn btn-secondary btn-sm">
+        ← بازگشت به داشبورد
+      </a>
+    </div>
+
+    <!-- Order Overview Box -->
+    <div style="background:var(--bg-surface-elevated); border:1px solid var(--border-subtle); border-radius:12px; padding:1.25rem; margin-bottom:1.75rem;">
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; font-size:0.875rem;">
+        <div>
+          <span style="color:var(--text-muted);">کالای درخواستی:</span>
+          <strong>{{ order.product.title|default:order.custom_product_title }}</strong>
+        </div>
+        <div>
+          <span style="color:var(--text-muted);">مقدار و واحد:</span>
+          <strong>{{ order.quantity }} {{ order.unit }}</strong>
+        </div>
+        <div>
+          <span style="color:var(--text-muted);">شهر مقصد:</span>
+          <strong>{{ order.destination_city }}</strong>
+        </div>
+        <div>
+          <span style="color:var(--text-muted);">تاریخ استعلام:</span>
+          <strong>{{ order.created_at|date:"Y/m/d H:i" }}</strong>
+        </div>
+      </div>
+      {% if order.delivery_address %}
+        <div style="margin-top:0.75rem; font-size:0.85rem; border-top:1px solid var(--border-subtle); padding-top:0.5rem;">
+          <span style="color:var(--text-muted);">آدرس دقیق انبار:</span> {{ order.delivery_address }}
+        </div>
+      {% endif %}
+      {% if order.description %}
+        <div style="margin-top:0.5rem; font-size:0.85rem; background:var(--bg-surface); padding:0.5rem 0.75rem; border-radius:6px;">
+          <span style="color:var(--copper-primary); font-weight:700;">توضیحات خریدار:</span> {{ order.description }}
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Sales Officer Form -->
+    <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:16px; padding:2rem; box-shadow:var(--card-shadow);">
+      
+      <form method="post">
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label class="form-label">نرخ واحد پیش‌فاکتور (به تومان برای هر {{ order.unit }}) *</label>
+          {{ form.quoted_unit_price }}
+          <span class="form-help">قیمت روز مبنای این محصول در کاتالوگ: {{ order.product.price|intcomma|default:"نامشخص" }} تومان</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">وضعیت سفارش *</label>
+          {{ form.status }}
+          <span class="form-help">پس از تعیین نرخ، وضعیت را روی «پیش‌فاکتور صادر شد» تنظیم فرمایید.</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">یادداشت کارشناس و شرایط فروش (در پیش‌فاکتور چاپ می‌شود)</label>
+          {{ form.sales_rep_notes }}
+          <span class="form-help">مثال: اعتبار قیمت ۴۸ ساعت، تحویل انبار شورآباد، بارگیری پس از واریز پیش‌پرداخت.</span>
+        </div>
+
+        <div style="margin-top:1.5rem; display:flex; gap:1rem;">
+          <button type="submit" class="btn btn-primary" style="flex:1;">
+            <span>ذخیره و صدور پیش‌فاکتور رسمی</span>
+          </button>
+          <a href="{% url 'market:proforma_invoice' order.tracking_code %}" class="btn btn-secondary" target="_blank">
+            مشاهده پیش‌نمایش فاکتور
+          </a>
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+</section>
+{% endblock %}

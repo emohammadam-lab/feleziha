@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% load static humanize %}
+
+{% block title %}کاتالوگ و لیست قیمت فلزات | {{ brand_name }}{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top:1.5rem;">
+  <div class="container">
+    
+    <!-- Breadcrumb & Title -->
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
+      <div>
+        <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.25rem;">
+          <a href="{% url 'market:home' %}">صفحه اصلی</a>
+          <span>/</span>
+          <span>کاتالوگ و قیمت فلزات</span>
+          {% if active_category %}
+            <span>/</span>
+            <span style="color:var(--copper-primary); font-weight:700;">{{ active_category.name }}</span>
+          {% endif %}
+          {% if active_subcategory %}
+            <span>/</span>
+            <span>{{ active_subcategory.name }}</span>
+          {% endif %}
+        </div>
+        <h1 style="font-size:1.6rem; font-weight:800; color:var(--text-main);">
+          {% if active_subcategory %}
+            قیمت روز {{ active_subcategory.name }}
+          {% elif active_category %}
+            بازار تخصصی {{ active_category.name }}
+          {% else %}
+            آرشیو قیمت روز مس، آلومینیوم و مقاطع فلزی
+          {% endif %}
+        </h1>
+      </div>
+
+      <!-- Quick Search & Sort Bar -->
+      <form method="get" style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+        <input type="text" name="q" value="{{ search_query }}" placeholder="جستجو در محصولات..." class="form-input" style="width:220px; padding:0.5rem 0.75rem;">
+        <select name="sort" class="form-select" onchange="this.form.submit()" style="width:160px; padding:0.5rem 0.75rem;">
+          <option value="updated" {% if sort == 'updated' %}selected{% endif %}>جدیدترین بروزرسانی</option>
+          <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>قیمت: ارزان‌ترین</option>
+          <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>قیمت: گران‌ترین</option>
+          <option value="title" {% if sort == 'title' %}selected{% endif %}>نام محصول</option>
+        </select>
+        <button type="submit" class="btn btn-secondary btn-sm">فیلتر</button>
+      </form>
+    </div>
+
+    <!-- Main Catalog Grid: Sidebar + Table -->
+    <div style="display:grid; grid-template-columns: 280px 1fr; gap:1.75rem; align-items:start;">
+      
+      <!-- SIDEBAR: Category Hierarchy -->
+      <aside style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:12px; padding:1.25rem; box-shadow:var(--card-shadow);">
+        <h3 style="font-size:1rem; font-weight:700; color:var(--text-main); margin-bottom:1rem; padding-bottom:0.5rem; border-bottom:1px solid var(--border-subtle);">
+          دسته‌بندی و مقاطع فلزی
+        </h3>
+
+        <div style="display:flex; flex-direction:column; gap:0.75rem;">
+          <a href="{% url 'market:product_list' %}" style="font-size:0.9rem; font-weight:600; padding:0.4rem 0.6rem; border-radius:6px; {% if not active_category and not active_subcategory %}background:var(--copper-light); color:var(--copper-primary);{% endif %}">
+            همه دسته‌بندی‌ها
+          </a>
+
+          {% for cat in categories %}
+            <div style="border-top:1px solid var(--border-subtle); padding-top:0.6rem;">
+              <a href="{% url 'market:category_products' cat.slug %}" style="display:flex; align-items:center; justify-content:space-between; font-size:0.925rem; font-weight:700; color:var(--text-main); margin-bottom:0.35rem;">
+                <span>{{ cat.name }}</span>
+                <span style="font-size:0.75rem; color:var(--text-muted);">{{ cat.subcategories.count }} زیردسته</span>
+              </a>
+
+              <ul style="list-style:none; padding-right:0.75rem; display:flex; flex-direction:column; gap:0.25rem;">
+                {% for sub in cat.subcategories.all %}
+                  <li>
+                    <a href="{% url 'market:subcategory_products' sub.slug %}" style="font-size:0.85rem; color:var(--text-muted); display:block; padding:0.25rem 0.5rem; border-radius:4px; {% if active_subcategory.id == sub.id %}background:var(--copper-light); color:var(--copper-primary); font-weight:700;{% endif %}">
+                      • {{ sub.name }}
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- Consultation Box -->
+        <div style="margin-top:1.5rem; background:var(--bg-surface-elevated); border:1px dashed var(--copper-primary); border-radius:8px; padding:1rem; text-align:center;">
+          <h4 style="font-size:0.875rem; color:var(--copper-primary); margin-bottom:0.25rem;">استعلام تلفنی قیمت عمده</h4>
+          <p style="font-size:0.775rem; color:var(--text-muted); margin-bottom:0.5rem;">برای تناژهای بالای ۱۰ تن با تخفیف ویژه بازرگانی تماس بگیرید:</p>
+          <strong style="font-size:1rem; color:var(--text-main); direction:ltr; display:inline-block;">{{ support_phone }}</strong>
+        </div>
+      </aside>
+
+      <!-- PRODUCT TABLE / LIST -->
+      <main>
+        {% if products %}
+          <div class="table-container">
+            <table class="price-table">
+              <thead>
+                <tr>
+                  <th>نام کالا و استاندارد</th>
+                  <th>کارخانه / برند</th>
+                  <th>ابعاد / مشخصات</th>
+                  <th>واحد</th>
+                  <th>قیمت روز (تومان)</th>
+                  <th>نوسان</th>
+                  <th>محل بارگیری</th>
+                  <th>پیش‌فاکتور</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for prod in products %}
+                  <tr>
+                    <td>
+                      <a href="{% url 'market:product_detail' prod.slug %}" class="product-cell-title">
+                        {{ prod.title }}
+                      </a>
+                      <span class="product-cell-sub">گرید: {{ prod.alloy_grade }}</span>
+                    </td>
+                    <td><strong style="color:var(--text-main);">{{ prod.manufacturer }}</strong></td>
+                    <td><span style="font-size:0.825rem; color:var(--text-muted);">{{ prod.dimensions }}</span></td>
+                    <td>{{ prod.unit }}</td>
+                    <td class="price-cell">{{ prod.price|intcomma }}</td>
+                    <td>
+                      {% if prod.is_price_up %}
+                        <span class="badge-change up">▲ +{{ prod.price_diff_percent }}%</span>
+                      {% elif prod.is_price_down %}
+                        <span class="badge-change down">▼ {{ prod.price_diff_percent }}%</span>
+                      {% else %}
+                        <span class="badge-change neutral">ثابت</span>
+                      {% endif %}
+                    </td>
+                    <td><span style="font-size:0.8rem; color:var(--text-muted);">{{ prod.warehouse_location }}</span></td>
+                    <td>
+                      <a href="{% url 'market:product_detail' prod.slug %}" class="btn btn-outline-copper btn-sm">
+                        مشاهده و خرید
+                      </a>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:12px; padding:3rem; text-align:center;">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" style="margin-bottom:1rem;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <h3 style="font-size:1.15rem; color:var(--text-main); margin-bottom:0.5rem;">محصولی با این مشخصات یافت نشد</h3>
+            <p style="font-size:0.875rem; color:var(--text-muted); margin-bottom:1rem;">می‌توانید محصول مورد نیاز خود را به صورت استعلام اختصاصی ثبت فرمایید تا کارشناسان ما قیمت آن را استخراج کنند.</p>
+            <a href="{% url 'market:inquiry_create' %}" class="btn btn-primary btn-sm">ثبت استعلام کالای سفارشی</a>
+          </div>
+        {% endif %}
+      </main>
+
+    </div>
+
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}ورود کاربران و خریداران | {{ brand_name }}{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top:3rem;">
+  <div class="auth-wrapper">
+    
+    <div style="text-align:center; margin-bottom:1.75rem;">
+      <div class="brand-logo-icon" style="margin:0 auto 1rem; width:48px; height:48px;">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+      </div>
+      <h1 style="font-size:1.5rem; font-weight:900; color:var(--text-main); margin-bottom:0.35rem;">
+        ورود به سامانه معاملات فلز آنلاین
+      </h1>
+      <p style="font-size:0.85rem; color:var(--text-muted);">
+        دسترسی به استعلامات، پیگیری سفارشات و پیش‌فاکتورهای رسمی
+      </p>
+    </div>
+
+    <!-- Quick Demo Accounts for Testing Different Roles -->
+    <div class="demo-login-box">
+      <div style="font-size:0.8rem; font-weight:700; color:var(--copper-primary); margin-bottom:0.35rem;">
+        ⚡ تست سریع با نقش‌های کاربری (یک کلیک):
+      </div>
+      <div class="demo-pills">
+        <form method="post" style="display:contents;">
+          {% csrf_token %}
+          <input type="hidden" name="demo_user" value="admin">
+          <button type="submit" class="demo-btn">👑 مدیر کل سیستم (Admin)</button>
+        </form>
+        <form method="post" style="display:contents;">
+          {% csrf_token %}
+          <input type="hidden" name="demo_user" value="sales_manager">
+          <button type="submit" class="demo-btn">💼 کارشناس فروش (Sales)</button>
+        </form>
+        <form method="post" style="display:contents;">
+          {% csrf_token %}
+          <input type="hidden" name="demo_user" value="news_editor">
+          <button type="submit" class="demo-btn">✍️ کارشناس اخبار (Editor)</button>
+        </form>
+        <form method="post" style="display:contents;">
+          {% csrf_token %}
+          <input type="hidden" name="demo_user" value="buyer1">
+          <button type="submit" class="demo-btn">🏭 خریدار صنعتی (Buyer)</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Regular Login Form -->
+    <form method="post" action="{% url 'accounts:login' %}">
+      {% csrf_token %}
+
+      <div class="form-group">
+        <label class="form-label">نام کاربری یا شماره موبایل</label>
+        {{ form.username }}
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">رمز عبور</label>
+        {{ form.password }}
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg" style="width:100%; margin-top:0.75rem;">
+        <span>ورود به حساب کاربری</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+      </button>
+
+      <div style="margin-top:1.5rem; text-align:center; font-size:0.875rem; color:var(--text-muted); border-top:1px solid var(--border-subtle); padding-top:1.25rem;">
+        هنوز ثبت‌نام نکرده‌اید؟ 
+        <a href="{% url 'accounts:register' %}" style="color:var(--copper-primary); font-weight:700;">ثبت‌نام خریداران و شرکت‌ها</a>
+      </div>
+    </form>
+
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load static humanize %}
+
+{% block title %}اخبار و تحلیل‌های بازار مس، بورس کالا و LME | {{ brand_name }}{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top:1.5rem;">
+  <div class="container">
+    
+    <!-- Header -->
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">
+      <div>
+        <h1 style="font-size:1.6rem; font-weight:900; color:var(--text-main);">
+          اخبار و تحلیل‌های تخصصی بورس کالا و فلزات اساسی
+        </h1>
+        <p style="font-size:0.875rem; color:var(--text-muted); margin-top:0.25rem;">
+          پوشش تحلیلی عرضه‌های مس و آلومینیوم در بورس کالای ایران و نوسانات بهای جهانی در بورس فلزات لندن (LME)
+        </p>
+      </div>
+
+      {% if user.can_manage_news %}
+        <a href="{% url 'news:article_create' %}" class="btn btn-primary btn-sm">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          <span>انتشار خبر و تحلیل جدید</span>
+        </a>
+      {% endif %}
+    </div>
+
+    <!-- Category Filter Pills -->
+    <div style="display:flex; gap:0.5rem; margin-bottom:2rem; overflow-x:auto;">
+      <a href="{% url 'news:news_list' %}" class="btn btn-secondary btn-sm {% if not active_category %}active{% endif %}">
+        همه حوزه‌های خبری
+      </a>
+      {% for cat in categories %}
+        <a href="{% url 'news:category_news' cat.slug %}" class="btn btn-secondary btn-sm {% if active_category.id == cat.id %}active{% endif %}">
+          {{ cat.name }}
+        </a>
+      {% endfor %}
+    </div>
+
+    <!-- Breaking / Featured News -->
+    {% if breaking_news %}
+      <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:16px; padding:2rem; margin-bottom:2.5rem; box-shadow:var(--card-shadow); display:grid; grid-template-columns: 1fr; gap:1rem;">
+        <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.5rem;">
+          <span style="background:var(--copper-primary); color:#ffffff; font-size:0.75rem; font-weight:800; padding:0.2rem 0.6rem; border-radius:4px;">خبر برگزیده تحریریه</span>
+          <span style="font-size:0.8rem; color:var(--text-light);">{{ breaking_news.published_at|date:"Y/m/d ساعت H:i" }}</span>
+        </div>
+        <h2 style="font-size:1.4rem; font-weight:900; line-height:1.4; color:var(--text-main);">
+          <a href="{% url 'news:news_detail' breaking_news.slug %}">{{ breaking_news.title }}</a>
+        </h2>
+        <p style="font-size:0.95rem; color:var(--text-muted); line-height:1.7;">
+          {{ breaking_news.summary }}
+        </p>
+        <div style="display:flex; align-items:center; justify-content:space-between; border-top:1px solid var(--border-subtle); padding-top:1rem;">
+          <span style="font-size:0.8rem; color:var(--text-muted);">منبع: <strong>{{ breaking_news.source }}</strong> • بازدید: {{ breaking_news.views_count }}</span>
+          <a href="{% url 'news:news_detail' breaking_news.slug %}" class="btn btn-outline-copper btn-sm">
+            مطالعه متن کامل و ارقام ←
+          </a>
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- Articles Grid -->
+    <div class="news-grid">
+      {% for article in articles %}
+        <article class="news-card">
+          <div class="news-card-badge">
+            <span class="news-tag">{{ article.image_badge }}</span>
+            <span class="news-date">{{ article.published_at|date:"Y/m/d" }}</span>
+          </div>
+          <div class="news-card-body">
+            <h3 class="news-card-title">
+              <a href="{% url 'news:news_detail' article.slug %}">{{ article.title }}</a>
+            </h3>
+            <p class="news-card-summary">
+              {{ article.summary|truncatewords:24 }}
+            </p>
+            <div class="news-card-footer">
+              <span>{{ article.source|truncatechars:20 }}</span>
+              <a href="{% url 'news:news_detail' article.slug %}" style="color:var(--copper-primary); font-weight:700;">
+                متن خبر ←
+              </a>
+            </div>
+          </div>
+        </article>
+      {% empty %}
+        <p>مقاله‌ای در این دسته‌بندی یافت نشد.</p>
+      {% endfor %}
+    </div>
+
+  </div>
+</section>
+{% endblock %}

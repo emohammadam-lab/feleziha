@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+{% load static humanize %}
+
+{% block title %}قیمت و خرید {{ product.title }} | {{ brand_name }}{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top:1.5rem;">
+  <div class="container">
+    
+    <!-- Breadcrumbs -->
+    <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:1.25rem;">
+      <a href="{% url 'market:home' %}">صفحه اصلی</a>
+      <span>/</span>
+      <a href="{% url 'market:category_products' product.subcategory.category.slug %}">{{ product.subcategory.category.name }}</a>
+      <span>/</span>
+      <a href="{% url 'market:subcategory_products' product.subcategory.slug %}">{{ product.subcategory.name }}</a>
+      <span>/</span>
+      <span style="color:var(--copper-primary); font-weight:700;">{{ product.title }}</span>
+    </div>
+
+    <!-- Main Product Layout: Specs (Left) + Price/Order (Right) -->
+    <div style="display:grid; grid-template-columns: 1.3fr 0.9fr; gap:2rem; align-items:start; margin-bottom:2.5rem;">
+      
+      <!-- Specifications & Description -->
+      <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:16px; padding:2rem; box-shadow:var(--card-shadow);">
+        
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
+          <span style="background:var(--copper-light); color:var(--copper-primary); font-weight:700; font-size:0.8rem; padding:0.25rem 0.75rem; border-radius:20px;">
+            {{ product.subcategory.name }}
+          </span>
+          <span style="font-size:0.8rem; color:var(--text-light);">
+            آخرین بروزرسانی قیمت: {{ product.updated_at|date:"Y/m/d ساعت H:i" }}
+          </span>
+        </div>
+
+        <h1 style="font-size:1.65rem; font-weight:900; color:var(--text-main); line-height:1.35; margin-bottom:1rem;">
+          {{ product.title }}
+        </h1>
+
+        <p style="font-size:0.95rem; color:var(--text-muted); line-height:1.75; margin-bottom:1.75rem;">
+          {{ product.description }}
+        </p>
+
+        <!-- Technical Specs Table -->
+        <h3 style="font-size:1.1rem; font-weight:800; color:var(--text-main); margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--copper-primary)" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+          <span>مشخصات فنی و استانداردهای متالورژی</span>
+        </h3>
+
+        <div style="background:var(--bg-surface-elevated); border:1px solid var(--border-subtle); border-radius:10px; overflow:hidden; margin-bottom:1.75rem;">
+          <table style="width:100%; border-collapse:collapse; font-size:0.875rem;">
+            <tbody>
+              <tr style="border-bottom:1px solid var(--border-subtle);">
+                <td style="padding:0.75rem 1rem; color:var(--text-muted); width:35%;">گرید / آلیاژ / خلوص</td>
+                <td style="padding:0.75rem 1rem; font-weight:700; color:var(--text-main);">{{ product.alloy_grade }}</td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border-subtle);">
+                <td style="padding:0.75rem 1rem; color:var(--text-muted);">کارخانه و مجتمع تولیدی</td>
+                <td style="padding:0.75rem 1rem; font-weight:700; color:var(--text-main);">{{ product.manufacturer }}</td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border-subtle);">
+                <td style="padding:0.75rem 1rem; color:var(--text-muted);">ابعاد، ضخامت یا سایز</td>
+                <td style="padding:0.75rem 1rem; font-weight:700; color:var(--text-main);">{{ product.dimensions }}</td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border-subtle);">
+                <td style="padding:0.75rem 1rem; color:var(--text-muted);">استاندارد بین‌المللی مرجع</td>
+                <td style="padding:0.75rem 1rem; font-weight:700; color:var(--text-main);">{{ product.standards|default:"ASTM / DIN EN" }}</td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border-subtle);">
+                <td style="padding:0.75rem 1rem; color:var(--text-muted);">چگالی رسمی متالورژیکی</td>
+                <td style="padding:0.75rem 1rem; font-weight:700; color:var(--text-main);" dir="ltr">{{ product.density }} g/cm³</td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border-subtle);">
+                <td style="padding:0.75rem 1rem; color:var(--text-muted);">محل انبار / مبدأ بارگیری</td>
+                <td style="padding:0.75rem 1rem; font-weight:700; color:var(--text-main);">{{ product.warehouse_location }}</td>
+              </tr>
+              <tr>
+                <td style="padding:0.75rem 1rem; color:var(--text-muted);">حداقل میزان سفارش</td>
+                <td style="padding:0.75rem 1rem; font-weight:700; color:var(--copper-primary);">{{ product.min_order }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Price History Points -->
+        {% if price_history %}
+          <h3 style="font-size:1.05rem; font-weight:800; color:var(--text-main); margin-bottom:0.75rem;">
+            روند نوسانات قیمت در روزهای اخیر
+          </h3>
+          <div style="display:flex; gap:0.75rem; overflow-x:auto; padding-bottom:0.5rem;">
+            {% for h in price_history %}
+              <div style="background:var(--bg-surface-elevated); border:1px solid var(--border-subtle); border-radius:8px; padding:0.6rem 0.9rem; text-align:center; min-width:120px;">
+                <div style="font-size:0.75rem; color:var(--text-muted);">{{ h.recorded_at|date:"Y/m/d" }}</div>
+                <div style="font-size:0.95rem; font-weight:800; color:var(--text-main); margin-top:0.2rem;">{{ h.price|intcomma }}</div>
+                <div style="font-size:0.7rem; color:var(--copper-primary);">تومان</div>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+      </div>
+
+      <!-- Price & Order Action Card -->
+      <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:16px; padding:2rem; box-shadow:var(--card-shadow-hover); position:sticky; top:90px;">
+        
+        <div style="border-bottom:1px solid var(--border-subtle); padding-bottom:1.25rem; margin-bottom:1.5rem;">
+          <span style="font-size:0.85rem; color:var(--text-muted);">قیمت روز به ازای هر {{ product.unit }}:</span>
+          <div style="display:flex; align-items:baseline; gap:0.5rem; margin:0.4rem 0;">
+            <span style="font-size:2rem; font-weight:900; color:var(--copper-primary);">{{ product.price|intcomma }}</span>
+            <span style="font-size:0.95rem; color:var(--text-main); font-weight:700;">تومان</span>
+          </div>
+
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-top:0.5rem;">
+            <span style="font-size:0.8rem; color:var(--text-muted);">تغییر نسبت به روز قبل:</span>
+            {% if product.is_price_up %}
+              <span class="badge-change up">▲ +{{ product.price_diff_percent }}% ({{ product.price_diff|intcomma }}+)</span>
+            {% elif product.is_price_down %}
+              <span class="badge-change down">▼ {{ product.price_diff_percent }}% ({{ product.price_diff|intcomma }})</span>
+            {% else %}
+              <span class="badge-change neutral">بدون تغییر</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <h3 style="font-size:1.05rem; font-weight:800; color:var(--text-main); margin-bottom:1rem;">
+          استعلام قیمت و صدور پیش‌فاکتور رسمی
+        </h3>
+
+        <!-- Order Form Prefilled with Product -->
+        <form action="{% url 'market:inquiry_create' %}" method="post">
+          {% csrf_token %}
+          <input type="hidden" name="product" value="{{ product.id }}">
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem;">
+            <div class="form-group">
+              <label class="form-label">مقدار درخواستی</label>
+              <input type="number" step="0.1" name="quantity" class="form-input" placeholder="مثال: ۱" value="1" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">واحد</label>
+              <select name="unit" class="form-select">
+                <option value="{{ product.unit }}">{{ product.unit }}</option>
+                <option value="تن">تن</option>
+                <option value="کیلوگرم">کیلوگرم</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">نام خریدار / شرکت</label>
+            <input type="text" name="customer_name" class="form-input" value="{{ request.user.get_full_name|default:request.user.username }}" placeholder="نام خریدار یا کارخانه" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">شماره همراه خریدار</label>
+            <input type="text" name="customer_phone" class="form-input" value="{{ request.user.phone_number|default:'' }}" placeholder="۰۹۱۲۳۴۵۶۷۸۹" dir="ltr" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">شهر و محل تخلیه بار</label>
+            <input type="text" name="destination_city" class="form-input" placeholder="مثال: اصفهان، شهرک صنعتی رازی" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">توضیحات و نیازمندی‌های بارگیری</label>
+            <textarea name="description" class="form-input" rows="2" placeholder="برش، بسته‌بندی، هماهنگی تریلی یا باربری"></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width:100%; padding:0.8rem;">
+            <span>ثبت استعلام و صدور پیش‌فاکتور</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </button>
+        </form>
+
+        <div style="margin-top:1.25rem; font-size:0.775rem; color:var(--text-muted); text-align:center;">
+          ✓ ارزش افزوده ۱۰٪ در پیش‌فاکتور رسمی به همراه شناسه رهگیری لحاظ می‌شود.
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Related Products -->
+    {% if related_products %}
+      <div style="border-top:1px solid var(--border-subtle); padding-top:2rem;">
+        <h3 style="font-size:1.2rem; font-weight:800; color:var(--text-main); margin-bottom:1.25rem;">
+          سایر محصولات در دسته {{ product.subcategory.name }}
+        </h3>
+        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:1.25rem;">
+          {% for rel in related_products %}
+            <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:10px; padding:1.25rem; box-shadow:var(--card-shadow);">
+              <h4 style="font-size:0.95rem; font-weight:700; margin-bottom:0.5rem;">
+                <a href="{% url 'market:product_detail' rel.slug %}">{{ rel.title }}</a>
+              </h4>
+              <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.75rem;">برند: {{ rel.manufacturer }}</div>
+              <div style="display:flex; align-items:center; justify-content:space-between;">
+                <strong style="color:var(--copper-primary); font-size:1rem;">{{ rel.price|intcomma }} تومان</strong>
+                <a href="{% url 'market:product_detail' rel.slug %}" class="btn btn-secondary btn-sm">مشاهده</a>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+  </div>
+</section>
+{% endblock %}
