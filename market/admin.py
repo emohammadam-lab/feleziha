@@ -27,11 +27,11 @@ class PriceHistoryInline(admin.TabularInline):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('title', 'subcategory', 'manufacturer', 'price', 'price_diff_percent', 'stock_status', 'is_featured', 'updated_at')
-    list_filter = ('subcategory__category', 'subcategory', 'manufacturer', 'is_featured')
+    list_display = ('title', 'subcategory', 'manufacturer', 'pricing_mode', 'price', 'price_diff_percent', 'stock_status', 'is_featured', 'updated_at')
+    list_filter = ('pricing_mode', 'subcategory__category', 'subcategory', 'manufacturer', 'is_featured')
     search_fields = ('title', 'alloy_grade', 'manufacturer', 'dimensions')
     prepopulated_fields = {'slug': ('title',)}
-    list_editable = ('price', 'is_featured')
+    list_editable = ('pricing_mode', 'price', 'is_featured')
     inlines = [PriceHistoryInline]
 
     def save_model(self, request, obj, form, change):

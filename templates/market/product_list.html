@@ -118,9 +118,22 @@
                     <td><strong style="color:var(--text-main);">{{ prod.manufacturer }}</strong></td>
                     <td><span style="font-size:0.825rem; color:var(--text-muted);">{{ prod.dimensions }}</span></td>
                     <td>{{ prod.unit }}</td>
-                    <td class="price-cell">{{ prod.price|intcomma }}</td>
+                    <td class="price-cell">
+                      {% if prod.is_call_for_price %}
+                        <span style="color:var(--bronze-accent); font-size:0.875rem; font-weight:800; background:var(--warning-bg); padding:0.2rem 0.55rem; border-radius:4px; display:inline-block;">
+                          📞 تماس بگیرید
+                        </span>
+                      {% else %}
+                        {{ prod.price|intcomma }}
+                        {% if prod.is_api_pricing %}
+                          <span style="font-size:0.65rem; color:var(--success-color); font-weight:700; display:block;">(نرخ زنده بورس)</span>
+                        {% endif %}
+                      {% endif %}
+                    </td>
                     <td>
-                      {% if prod.is_price_up %}
+                      {% if prod.is_call_for_price %}
+                        <span class="badge-change neutral">استعلام روز</span>
+                      {% elif prod.is_price_up %}
                         <span class="badge-change up">▲ +{{ prod.price_diff_percent }}%</span>
                       {% elif prod.is_price_down %}
                         <span class="badge-change down">▼ {{ prod.price_diff_percent }}%</span>

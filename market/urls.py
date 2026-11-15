@@ -19,5 +19,6 @@ urlpatterns = [
     # Management & Sales Portal
     path('management/', views.management_dashboard_view, name='management_dashboard'),
     path('management/fast-price-update/', views.fast_price_update_api, name='fast_price_update'),
+    path('management/sync-api-prices/', views.sync_all_api_view, name='sync_api_prices'),
     path('management/quote/<str:tracking_code>/', views.sales_quotation_edit_view, name='sales_quotation_edit'),
 ]

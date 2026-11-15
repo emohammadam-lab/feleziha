@@ -191,17 +191,45 @@ document.addEventListener('DOMContentLoaded', function () {
         btn.innerText = originalText;
         btn.disabled = false;
         if (data.status === 'success') {
-          // Update displayed price in table
           const prodId = formData.get('product_id');
-          const displayEl = document.getElementById(`price-display-${prodId}`);
-          if (displayEl) {
-            displayEl.innerText = data.new_price + ' تومان';
-            displayEl.style.color = '#16a34a';
-            setTimeout(() => { displayEl.style.color = ''; }, 2000);
+          const statusContainer = document.getElementById(`price-status-${prodId}`);
+          
+          if (statusContainer) {
+            if (data.mode === 'call') {
+              statusContainer.innerHTML = `
+                <span class="badge-change neutral" style="background:var(--warning-bg); color:var(--warning-color); font-weight:800;">
+                  📞 تماس بگیرید
+                </span>
+              `;
+            } else if (data.mode === 'api') {
+              statusContainer.innerHTML = `
+                <div style="display:flex; flex-direction:column;">
+                  <strong style="color:var(--copper-primary); font-size:0.95rem;">${data.new_price} تومان</strong>
+                  <span style="font-size:0.7rem; color:var(--success-color);">✓ متصل به وب‌سرویس</span>
+                </div>
+              `;
+            } else {
+              statusContainer.innerHTML = `
+                <div style="display:flex; flex-direction:column;">
+                  <strong style="color:var(--text-main); font-size:0.95rem;">${data.new_price} تومان</strong>
+                  <span style="font-size:0.7rem; color:var(--text-muted);">نرخ دستی کارشناس</span>
+                </div>
+              `;
+            }
           }
-          alert(data.message);
+
+          // Inline subtle notification
+          const notif = document.createElement('span');
+          notif.innerText = '✓ ذخیره شد';
+          notif.style.color = '#16a34a';
+          notif.style.fontSize = '0.75rem';
+          notif.style.fontWeight = '700';
+          notif.style.marginRight = '0.4rem';
+          btn.parentNode.appendChild(notif);
+          setTimeout(() => { notif.remove(); }, 2500);
+
         } else {
-          alert('خطا: ' + data.message);
+          alert('خطا: ' + (data.message || 'خطایی رخ داد'));
         }
       })
       .catch(err => {

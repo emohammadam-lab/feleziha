@@ -37,6 +37,11 @@ class SubCategory(models.Model):
 
 
 class Product(models.Model):
+    class PricingMode(models.TextChoices):
+        MANUAL = 'manual', 'دستی (کارشناس)'
+        AUTO_API = 'api', 'اتوماتیک (وب‌سرویس / بورس)'
+        CALL = 'call', 'بدون نرخ (تماس بگیرید)'
+
     subcategory = models.ForeignKey(SubCategory, on_delete=models.CASCADE, related_name='products', verbose_name="زیردسته")
     title = models.CharField(max_length=200, verbose_name="عنوان محصول")
     slug = models.SlugField(max_length=200, unique=True, allow_unicode=True, verbose_name="شناسه یکتا (Slug)")
@@ -45,7 +50,21 @@ class Product(models.Model):
     dimensions = models.CharField(max_length=150, verbose_name="ابعاد / سایز / ضخامت", help_text="مثال: قطر ۸ میلیمتر، شاخه ۶ متری، ضخامت ۲ میل")
     unit = models.CharField(max_length=30, default="کیلوگرم", verbose_name="واحد قیمت‌گذاری")
     
-    price = models.BigIntegerField(verbose_name="قیمت روز (تومان)")
+    # PRICING MODES
+    pricing_mode = models.CharField(
+        max_length=15,
+        choices=PricingMode.choices,
+        default=PricingMode.MANUAL,
+        verbose_name="روش نرخ‌گذاری"
+    )
+    api_source = models.CharField(
+        max_length=60,
+        blank=True,
+        default="IME_LME_FEED",
+        verbose_name="منبع API یا فرمول نرخ"
+    )
+
+    price = models.BigIntegerField(default=0, verbose_name="قیمت روز (تومان)")
     price_previous = models.BigIntegerField(default=0, verbose_name="قیمت روز قبل (تومان)")
     min_order = models.CharField(max_length=80, default="۱ تن", verbose_name="حداقل میزان سفارش")
     
@@ -76,13 +95,25 @@ class Product(models.Model):
         return f"{self.title} - {self.manufacturer}"
 
     @property
+    def is_call_for_price(self):
+        return self.pricing_mode == self.PricingMode.CALL or self.price == 0
+
+    @property
+    def is_api_pricing(self):
+        return self.pricing_mode == self.PricingMode.AUTO_API
+
+    @property
     def price_diff(self):
+        if self.is_call_for_price:
+            return 0
         if self.price_previous and self.price_previous > 0:
             return self.price - self.price_previous
         return 0
 
     @property
     def price_diff_percent(self):
+        if self.is_call_for_price:
+            return 0.0
         if self.price_previous and self.price_previous > 0:
             diff = self.price - self.price_previous
             return round((diff / self.price_previous) * 100, 2)
@@ -149,7 +180,6 @@ class OrderInquiry(models.Model):
     delivery_address = models.TextField(blank=True, verbose_name="آدرس دقیق تخلیه بار")
     description = models.TextField(blank=True, verbose_name="توضیحات و نیازمندی‌های باربری / بسته‌بندی")
 
-    # Financial / Quotation details
     quoted_unit_price = models.BigIntegerField(default=0, verbose_name="نرخ واحد پیش‌فاکتور (تومان)")
     quoted_subtotal = models.BigIntegerField(default=0, verbose_name="مبلغ پایه (تومان)")
     tax_amount = models.BigIntegerField(default=0, verbose_name="مالیات بر ارزش افزوده (۱۰٪)")

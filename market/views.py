@@ -5,7 +5,8 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.db.models import Q
 from .models import Category, SubCategory, Product, PriceHistory, OrderInquiry
-from .forms import OrderInquiryForm, SalesQuotationUpdateForm, FastPriceUpdateForm
+from .forms import OrderInquiryForm, SalesQuotationUpdateForm
+from .pricing_service import sync_all_api_products, calculate_formula_price
 from news.models import Article
 
 
@@ -14,24 +15,24 @@ def home_view(request):
     Main portal homepage:
     - Live Ticker of metals
     - Category & Subcategory tabs
-    - Daily price tables
+    - Daily price tables (handling Manual, API, and Call-for-price)
     - Interactive calculator
     - Real industry news & market insights
     """
     categories = Category.objects.filter(is_active=True).prefetch_related('subcategories__products')
     
-    # Selected category for default tab: copper
+    # Categorized products
     copper_cat = Category.objects.filter(slug='copper').first()
-    copper_products = Product.objects.filter(subcategory__category=copper_cat)[:10] if copper_cat else Product.objects.all()[:10]
+    copper_products = Product.objects.filter(subcategory__category=copper_cat)[:12] if copper_cat else Product.objects.all()[:12]
     
     aluminum_cat = Category.objects.filter(slug='aluminum').first()
-    aluminum_products = Product.objects.filter(subcategory__category=aluminum_cat)[:10] if aluminum_cat else []
+    aluminum_products = Product.objects.filter(subcategory__category=aluminum_cat)[:12] if aluminum_cat else []
 
     steel_cat = Category.objects.filter(slug='steel').first()
-    steel_products = Product.objects.filter(subcategory__category=steel_cat)[:10] if steel_cat else []
+    steel_products = Product.objects.filter(subcategory__category=steel_cat)[:12] if steel_cat else []
 
     other_cat = Category.objects.filter(slug='other-metals').first()
-    other_products = Product.objects.filter(subcategory__category=other_cat)[:10] if other_cat else []
+    other_products = Product.objects.filter(subcategory__category=other_cat)[:12] if other_cat else []
 
     # Latest authentic market news
     latest_articles = Article.objects.all().order_by('-published_at')[:4]
@@ -112,7 +113,7 @@ def product_list_view(request, category_slug=None, subcategory_slug=None):
 
 def product_detail_view(request, slug):
     """
-    Product details: specs, live price, history chart points, and direct inquiry form.
+    Product details: specs, live price (or call-for-price), history chart, and direct inquiry form.
     """
     product = get_object_or_404(Product.objects.select_related('subcategory__category'), slug=slug)
     price_history = product.price_history.all().order_by('recorded_at')[:10]
@@ -158,7 +159,7 @@ def inquiry_create_view(request):
                 order.user = request.user
             
             # If product is chosen and has price, estimate default unit price
-            if order.product and order.product.price:
+            if order.product and order.product.price and not order.product.is_call_for_price:
                 order.quoted_unit_price = order.product.price
 
             order.save()
@@ -213,50 +214,51 @@ def proforma_invoice_view(request, tracking_code):
     Official downloadable / printable Proforma Invoice (پیش‌فاکتور رسمی).
     """
     order = get_object_or_404(OrderInquiry, tracking_code=tracking_code)
-    
-    # Permission check: superuser, sales, or the owner of order
-    if not (request.user.is_authenticated and (request.user.is_admin_role or request.user.is_sales_role or order.user == request.user)):
-        # If guest order, allow viewing with matching phone number validation or direct tracking code
-        pass
-
     return render(request, 'market/proforma_invoice.html', {'order': order})
 
 
 # ========================================================
-# Sales & Admin Management Portal
+# Sales & Admin Management Portal (SIMPLIFIED & FAST)
 # ========================================================
-
-def sales_or_admin_required(user):
-    return user.is_authenticated and (user.is_admin_role or user.is_sales_role)
-
 
 @login_required
 def management_dashboard_view(request):
+    """
+    Clean, focused, and simplified management control center:
+    - Tab 1: Pricing Board (Manual, Auto-API, Call-for-price)
+    - Tab 2: Orders & Inquiries pipeline
+    """
     if not (request.user.is_admin_role or request.user.is_sales_role or request.user.is_content_role):
-        messages.error(request, "شما دسترسی مجاز به پنل مدیریت داخلی را ندارید.")
+        messages.error(request, "شما دسترسی مجاز به پنل مدیریت را ندارید.")
         return redirect('market:home')
 
+    active_tab = request.GET.get('tab', 'pricing')
     status_filter = request.GET.get('status', '')
+
     inquiries_qs = OrderInquiry.objects.all().order_by('-created_at')
     if status_filter:
         inquiries_qs = inquiries_qs.filter(status=status_filter)
 
-    products = Product.objects.all().order_by('subcategory__category', 'title')
+    products = Product.objects.select_related('subcategory__category').all().order_by('subcategory__category', 'title')
 
+    # Concise stats
     stats = {
-        'inquiries_total': OrderInquiry.objects.count(),
         'inquiries_pending': OrderInquiry.objects.filter(status=OrderInquiry.Status.PENDING).count(),
         'inquiries_quoted': OrderInquiry.objects.filter(status=OrderInquiry.Status.QUOTED).count(),
-        'products_count': Product.objects.count(),
-        'articles_count': Article.objects.count(),
+        'products_total': products.count(),
+        'products_api': products.filter(pricing_mode=Product.PricingMode.AUTO_API).count(),
+        'products_call': products.filter(pricing_mode=Product.PricingMode.CALL).count(),
+        'products_manual': products.filter(pricing_mode=Product.PricingMode.MANUAL).count(),
     }
 
     context = {
-        'inquiries': inquiries_qs[:20],
+        'inquiries': inquiries_qs[:30],
         'products': products,
         'stats': stats,
+        'active_tab': active_tab,
         'status_filter': status_filter,
         'status_choices': OrderInquiry.Status.choices,
+        'pricing_mode_choices': Product.PricingMode.choices,
     }
     return render(request, 'market/management_dashboard.html', context)
 
@@ -264,40 +266,115 @@ def management_dashboard_view(request):
 @login_required
 def fast_price_update_api(request):
     """
-    AJAX / POST endpoint for Sales Officers to update metal prices quickly.
+    AJAX endpoint for Sales & Admin to:
+    1. Set Manual price
+    2. Switch to Auto-API pricing
+    3. Set to 'Call for price' (بدون نرخ / تماس بگیرید)
     """
     if not (request.user.is_admin_role or request.user.is_sales_role):
         return JsonResponse({'status': 'error', 'message': 'عدم دسترسی مجاز'}, status=403)
 
     if request.method == 'POST':
         product_id = request.POST.get('product_id')
-        new_price = request.POST.get('new_price')
-        note = request.POST.get('note', 'بروزرسانی از طریق پنل سریع')
+        pricing_mode = request.POST.get('pricing_mode', Product.PricingMode.MANUAL)
+        new_price_str = request.POST.get('new_price', '').strip()
+        note = request.POST.get('note', 'بروزرسانی از پنل مدیریت')
 
         try:
             product = Product.objects.get(id=product_id)
-            new_price = int(new_price)
-            if new_price > 0:
+            product.pricing_mode = pricing_mode
+
+            if pricing_mode == Product.PricingMode.CALL:
+                # Unpriced / Call for price
                 product.price_previous = product.price
-                product.price = new_price
+                product.price = 0
                 product.save()
 
                 PriceHistory.objects.create(
                     product=product,
-                    price=new_price,
-                    note=f"{note} (توسط {request.user.username})"
+                    price=0,
+                    note=f"تغییر به وضعیت تماس بگیرید (توسط {request.user.username})"
                 )
+
                 return JsonResponse({
                     'status': 'success',
-                    'message': f'قیمت {product.title} به {new_price:,} تومان تغییر یافت.',
-                    'new_price': f"{new_price:,}",
-                    'diff_percent': product.price_diff_percent,
-                    'is_up': product.is_price_up,
+                    'mode': 'call',
+                    'display_text': 'تماس بگیرید',
+                    'message': f'محصول «{product.title}» روی وضعیت «تماس بگیرید» تنظیم شد.',
                 })
+
+            elif pricing_mode == Product.PricingMode.AUTO_API:
+                # Auto API calculation
+                computed_price = calculate_formula_price(product)
+                product.price_previous = product.price or computed_price
+                product.price = computed_price
+                product.save()
+
+                PriceHistory.objects.create(
+                    product=product,
+                    price=computed_price,
+                    note=f"محاسبه وب‌سرویس LME/نیما: {computed_price:,} تومان"
+                )
+
+                return JsonResponse({
+                    'status': 'success',
+                    'mode': 'api',
+                    'display_text': f"{computed_price:,} تومان (API)",
+                    'new_price': f"{computed_price:,}",
+                    'diff_percent': product.price_diff_percent,
+                    'message': f'نرخ «{product.title}» به صورت خودکار از API روی {computed_price:,} تومان همگام شد.',
+                })
+
+            else:
+                # Manual pricing
+                if new_price_str:
+                    new_price = int(new_price_str)
+                    if new_price > 0:
+                        product.price_previous = product.price or new_price
+                        product.price = new_price
+                        product.save()
+
+                        PriceHistory.objects.create(
+                            product=product,
+                            price=new_price,
+                            note=f"{note} (توسط {request.user.username})"
+                        )
+
+                        return JsonResponse({
+                            'status': 'success',
+                            'mode': 'manual',
+                            'display_text': f"{new_price:,} تومان",
+                            'new_price': f"{new_price:,}",
+                            'diff_percent': product.price_diff_percent,
+                            'message': f'نرخ دستی «{product.title}» به {new_price:,} تومان بروز شد.',
+                        })
+                else:
+                    product.save()
+                    return JsonResponse({
+                        'status': 'success',
+                        'mode': 'manual',
+                        'display_text': f"{product.price:,} تومان",
+                        'message': 'تنظیمات ذخیره شد.',
+                    })
+
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
     return JsonResponse({'status': 'error', 'message': 'متد نامعتبر'}, status=405)
+
+
+@login_required
+def sync_all_api_view(request):
+    """
+    One-click trigger to sync all API-connected products with live market rates.
+    """
+    if not (request.user.is_admin_role or request.user.is_sales_role):
+        messages.error(request, "عدم دسترسی مجاز")
+        return redirect('market:management_dashboard')
+
+    updated = sync_all_api_products()
+    messages.success(request, f"همگام‌سازی وب‌سرویس با موفقیت انجام شد: {updated} محصول متصل به API بروزرسانی شدند.")
+    return redirect('market:management_dashboard')
 
 
 @login_required

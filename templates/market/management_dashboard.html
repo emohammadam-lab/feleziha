@@ -1,200 +1,229 @@
 {% extends "base.html" %}
 {% load static humanize %}
 
-{% block title %}پنل مدیریت و قیمت‌گذاری | {{ brand_name }}{% endblock %}
+{% block title %}میز مدیریت نرخ‌گذاری و سفارشات | {{ brand_name }}{% endblock %}
 
 {% block content %}
 <section class="section" style="padding-top:1.5rem;">
   <div class="container">
     
-    <!-- Top Bar with Role & Actions -->
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">
+    <!-- Top Action Bar (Clean & Focused) -->
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem; border-bottom:1px solid var(--border-subtle); padding-bottom:1.25rem;">
       <div>
-        <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.25rem;">
-          <h1 style="font-size:1.6rem; font-weight:900; color:var(--text-main);">
-            داشبورد مدیریت و کنترل عملیات فلز آنلاین
+        <div style="display:flex; align-items:center; gap:0.6rem;">
+          <h1 style="font-size:1.5rem; font-weight:900; color:var(--text-main);">
+            میز مدیریت نرخ‌گذاری و سفارشات
           </h1>
-          <span style="background:var(--copper-light); color:var(--copper-primary); font-size:0.8rem; font-weight:800; padding:0.2rem 0.6rem; border-radius:6px; border:1px solid var(--copper-border);">
-            نقش شما: {{ user.get_role_display }}
+          <span style="background:var(--copper-light); color:var(--copper-primary); font-size:0.75rem; font-weight:800; padding:0.2rem 0.5rem; border-radius:4px; border:1px solid var(--copper-border);">
+            {{ user.get_role_display }}
           </span>
         </div>
-        <p style="font-size:0.875rem; color:var(--text-muted);">
-          کنترل قیمت‌های روزانه، صدور پیش‌فاکتورها، مدیریت حقوق دسترسی کاربران و انتشار اخبار
-        </p>
       </div>
 
-      <!-- Quick Action Buttons -->
-      <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+      <div style="display:flex; gap:0.6rem; align-items:center; flex-wrap:wrap;">
+        <!-- Bulk API Sync Button -->
+        <a href="{% url 'market:sync_api_prices' %}" class="btn btn-secondary btn-sm" style="border-color:var(--success-color); color:var(--success-color);" title="بروزرسانی کلیه کالاهای دارای نرخ خودکار">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+          <span>همگام‌سازی وب‌سرویس بورس/LME ({{ stats.products_api }} کالا)</span>
+        </a>
+
         {% if user.is_admin_role %}
-          <a href="{% url 'accounts:user_management' %}" class="btn btn-secondary btn-sm" style="border-color:var(--copper-primary); color:var(--copper-primary);">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          <a href="{% url 'accounts:user_management' %}" class="btn btn-secondary btn-sm">
             <span>مدیریت کاربران و پرمیشن‌ها</span>
           </a>
           <a href="/admin/" class="btn btn-secondary btn-sm" target="_blank">
-            <span>پنل ادمین جنگو</span>
+            <span>ادمین جنگو</span>
           </a>
         {% endif %}
 
         {% if user.can_manage_news %}
           <a href="{% url 'news:article_create' %}" class="btn btn-primary btn-sm">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            <span>انتشار خبر و تحلیل جدید</span>
+            <span>+ انتشار خبر</span>
           </a>
         {% endif %}
       </div>
     </div>
 
-    <!-- Operation KPI Cards -->
-    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:1rem; margin-bottom:2rem;">
-      <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:10px; padding:1.25rem;">
-        <div style="font-size:0.8rem; color:var(--text-muted);">کل استعلام‌های دریافتی</div>
-        <div style="font-size:1.75rem; font-weight:800; color:var(--text-main); margin-top:0.25rem;">{{ stats.inquiries_total }}</div>
+    <!-- Quick Metric Pills -->
+    <div style="display:flex; gap:0.75rem; margin-bottom:1.5rem; flex-wrap:wrap;">
+      <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:8px; padding:0.5rem 1rem; font-size:0.85rem; display:flex; align-items:center; gap:0.5rem;">
+        <span style="color:var(--text-muted);">استعلام‌های جدید در انتظار:</span>
+        <strong style="color:var(--warning-color); font-size:1rem;">{{ stats.inquiries_pending }}</strong>
       </div>
-      <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:10px; padding:1.25rem;">
-        <div style="font-size:0.8rem; color:var(--warning-color);">استعلام‌های جدید (در انتظار قیمت)</div>
-        <div style="font-size:1.75rem; font-weight:800; color:var(--warning-color); margin-top:0.25rem;">{{ stats.inquiries_pending }}</div>
+      <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:8px; padding:0.5rem 1rem; font-size:0.85rem; display:flex; align-items:center; gap:0.5rem;">
+        <span style="color:var(--text-muted);">پیش‌فاکتورهای صادر شده:</span>
+        <strong style="color:var(--copper-primary); font-size:1rem;">{{ stats.inquiries_quoted }}</strong>
       </div>
-      <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:10px; padding:1.25rem;">
-        <div style="font-size:0.8rem; color:var(--copper-primary);">پیش‌فاکتورهای صادر شده</div>
-        <div style="font-size:1.75rem; font-weight:800; color:var(--copper-primary); margin-top:0.25rem;">{{ stats.inquiries_quoted }}</div>
+      <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:8px; padding:0.5rem 1rem; font-size:0.85rem; display:flex; align-items:center; gap:0.5rem;">
+        <span style="color:var(--text-muted);">اقلام متصل به API بورس:</span>
+        <strong style="color:var(--success-color); font-size:1rem;">{{ stats.products_api }}</strong>
       </div>
-      <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:10px; padding:1.25rem;">
-        <div style="font-size:0.8rem; color:var(--text-muted);">تعداد کل کالاهای تعریف شده</div>
-        <div style="font-size:1.75rem; font-weight:800; color:var(--text-main); margin-top:0.25rem;">{{ stats.products_count }} کالا</div>
+      <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:8px; padding:0.5rem 1rem; font-size:0.85rem; display:flex; align-items:center; gap:0.5rem;">
+        <span style="color:var(--text-muted);">اقلام در وضعیت «تماس بگیرید»:</span>
+        <strong style="color:var(--bronze-accent); font-size:1rem;">{{ stats.products_call }}</strong>
       </div>
     </div>
 
-    <!-- SECTION 1: INQUIRIES & ORDERS FOR SALES (استعلامات و سفارشات خریداران) -->
-    <div class="table-container" style="margin-bottom:2.5rem;">
-      <div style="padding:1.25rem; border-bottom:1px solid var(--border-subtle); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem;">
-        <div>
-          <h3 style="font-size:1.15rem; font-weight:800; color:var(--text-main);">
-            درخواست‌های استعلام و صدور پیش‌فاکتور
-          </h3>
-          <p style="font-size:0.8rem; color:var(--text-muted);">برای هر استعلام می‌توانید نرخ واحد را ثبت و وضعیت را به «پیش‌فاکتور صادر شد» تغییر دهید.</p>
-        </div>
-
-        <!-- Filter by Status -->
-        <div style="display:flex; align-items:center; gap:0.5rem;">
-          <a href="{% url 'market:management_dashboard' %}" class="btn btn-secondary btn-sm {% if not status_filter %}active{% endif %}">همه</a>
-          <a href="{% url 'market:management_dashboard' %}?status=pending" class="btn btn-secondary btn-sm {% if status_filter == 'pending' %}active{% endif %}" style="color:var(--warning-color);">در انتظار نرخ ({{ stats.inquiries_pending }})</a>
-          <a href="{% url 'market:management_dashboard' %}?status=quoted" class="btn btn-secondary btn-sm {% if status_filter == 'quoted' %}active{% endif %}" style="color:var(--copper-primary);">صادر شده</a>
-        </div>
-      </div>
-
-      <table class="price-table">
-        <thead>
-          <tr>
-            <th>کد رهگیری</th>
-            <th>خریدار / شماره تماس</th>
-            <th>کالای درخواستی</th>
-            <th>مقدار</th>
-            <th>مقصد تحویل</th>
-            <th>وضعیت</th>
-            <th>مبلغ نهایی (تومان)</th>
-            <th>اقدام کارشناس</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for inq in inquiries %}
-            <tr>
-              <td><strong style="color:var(--copper-primary); direction:ltr; display:inline-block;">{{ inq.tracking_code }}</strong></td>
-              <td>
-                <span class="product-cell-title">{{ inq.customer_name }}</span>
-                <span class="product-cell-sub" dir="ltr">{{ inq.customer_phone }}</span>
-              </td>
-              <td>
-                <span class="product-cell-title">{{ inq.product.title|default:inq.custom_product_title }}</span>
-                {% if inq.product %}<span class="product-cell-sub">{{ inq.product.dimensions }}</span>{% endif %}
-              </td>
-              <td><strong>{{ inq.quantity }} {{ inq.unit }}</strong></td>
-              <td><span style="font-size:0.825rem; color:var(--text-muted);">{{ inq.destination_city }}</span></td>
-              <td>
-                {% if inq.status == 'pending' %}
-                  <span class="badge-change neutral">در انتظار بررسی</span>
-                {% elif inq.status == 'quoted' %}
-                  <span class="badge-change up" style="background:var(--copper-light); color:var(--copper-primary);">پیش‌فاکتور صادر شد</span>
-                {% elif inq.status == 'approved' %}
-                  <span class="badge-change up">تأیید مالی</span>
-                {% else %}
-                  <span class="badge-change neutral">{{ inq.get_status_display }}</span>
-                {% endif %}
-              </td>
-              <td>
-                {% if inq.final_amount > 0 %}
-                  <strong style="color:var(--text-main);">{{ inq.final_amount|intcomma }}</strong>
-                {% else %}
-                  <span style="color:var(--text-light); font-size:0.8rem;">ثبت نشده</span>
-                {% endif %}
-              </td>
-              <td>
-                <div style="display:flex; gap:0.4rem;">
-                  <a href="{% url 'market:sales_quotation_edit' inq.tracking_code %}" class="btn btn-primary btn-sm">
-                    تعیین قیمت / ویرایش
-                  </a>
-                  <a href="{% url 'market:proforma_invoice' inq.tracking_code %}" class="btn btn-secondary btn-sm" target="_blank" title="مشاهده پیش‌فاکتور">
-                    فاکتور
-                  </a>
-                </div>
-              </td>
-            </tr>
-          {% empty %}
-            <tr><td colspan="8" style="text-align:center; padding:2.5rem;">استعلامی در این وضعیت موجود نیست.</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <!-- Main Tabs Switcher -->
+    <div style="display:flex; gap:0.5rem; border-bottom:2px solid var(--border-subtle); margin-bottom:1.5rem;">
+      <a href="?tab=pricing" class="btn btn-secondary btn-sm {% if active_tab == 'pricing' %}active{% endif %}" style="border-radius:6px 6px 0 0; border-bottom:none; font-weight:700; padding:0.6rem 1.25rem;">
+        <span>تابلو نرخ‌گذاری کالاها (دستی / خودکار API / بدون نرخ)</span>
+      </a>
+      <a href="?tab=inquiries" class="btn btn-secondary btn-sm {% if active_tab == 'inquiries' %}active{% endif %}" style="border-radius:6px 6px 0 0; border-bottom:none; font-weight:700; padding:0.6rem 1.25rem;">
+        <span>کارتابل سفارشات و صدور پیش‌فاکتور ({% if stats.inquiries_pending %}<span style="color:var(--warning-color);">{{ stats.inquiries_pending }} جدید</span>{% else %}عادی{% endif %})</span>
+      </a>
     </div>
 
-    <!-- SECTION 2: FAST INLINE PRICE UPDATER FOR SALES & ADMIN -->
-    {% if user.can_manage_prices %}
+    <!-- TAB 1: PRICING CONTROL BOARD -->
+    {% if active_tab == 'pricing' %}
       <div class="table-container">
-        <div style="padding:1.25rem; border-bottom:1px solid var(--border-subtle); display:flex; align-items:center; justify-content:space-between;">
-          <div>
-            <h3 style="font-size:1.15rem; font-weight:800; color:var(--text-main);">
-              بروزرسانی سریع نرخ روزانه فلزات (تابلو نرخ)
-            </h3>
-            <p style="font-size:0.8rem; color:var(--text-muted);">
-              قیمت جدید را وارد کرده و دکمه ذخیره را بزنید؛ قیمت در لحظه روی کل سایت و تابلو زنده بروزرسانی خواهد شد.
-            </p>
-          </div>
+        <div style="padding:0.85rem 1.25rem; background:var(--bg-surface-elevated); border-bottom:1px solid var(--border-subtle); display:flex; align-items:center; justify-content:space-between;">
+          <span style="font-size:0.85rem; font-weight:700; color:var(--text-main);">
+            تعیین شیوه نرخ‌گذاری (دستی، وب‌سرویس اتوماتیک یا بدون نرخ/تماس بگیرید):
+          </span>
+          <span style="font-size:0.75rem; color:var(--text-muted);">
+            تغییر وضعیت یا نرخ به صورت آنی در کل سایت ذخیره می‌شود.
+          </span>
         </div>
 
         <table class="price-table">
           <thead>
             <tr>
-              <th>کالا و دسته‌بندی</th>
-              <th>تولیدکننده</th>
-              <th>قیمت فعلی (تومان)</th>
-              <th>آخرین بروزرسانی</th>
-              <th>ثبت قیمت جدید روز (تومان)</th>
+              <th style="width:25%;">کالا و تولیدکننده</th>
+              <th style="width:22%;">روش نرخ‌گذاری</th>
+              <th style="width:18%;">نرخ فعلی در سایت</th>
+              <th style="width:25%;">قیمت جدید (تومان)</th>
+              <th style="width:10%;">اقدام</th>
             </tr>
           </thead>
           <tbody>
             {% for prod in products %}
-              <tr>
+              <tr id="row-prod-{{ prod.id }}">
                 <td>
-                  <span class="product-cell-title">{{ prod.title }}</span>
-                  <span class="product-cell-sub">{{ prod.subcategory }}</span>
+                  <strong style="color:var(--text-main); font-size:0.9rem;">{{ prod.title }}</strong>
+                  <div style="font-size:0.75rem; color:var(--text-muted);">
+                    {{ prod.subcategory.category.name }} • {{ prod.manufacturer }} • واحد: {{ prod.unit }}
+                  </div>
                 </td>
-                <td>{{ prod.manufacturer }}</td>
                 <td>
-                  <strong id="price-display-{{ prod.id }}" style="font-size:1rem; color:var(--copper-primary);">
-                    {{ prod.price|intcomma }} تومان
-                  </strong>
-                </td>
-                <td><span style="font-size:0.8rem; color:var(--text-muted);">{{ prod.updated_at|date:"Y/m/d H:i" }}</span></td>
-                <td>
-                  <form class="fast-price-form" style="display:flex; align-items:center; gap:0.5rem;">
+                  <!-- Pricing Mode Selector -->
+                  <form class="fast-price-form" id="form-prod-{{ prod.id }}" style="display:flex; align-items:center; gap:0.5rem;">
                     {% csrf_token %}
                     <input type="hidden" name="product_id" value="{{ prod.id }}">
-                    <input type="number" name="new_price" class="form-input" placeholder="نرخ جدید" style="width:140px; padding:0.35rem 0.6rem;" required>
-                    <input type="text" name="note" class="form-input" placeholder="دلیل نوسان" style="width:160px; padding:0.35rem 0.6rem;">
-                    <button type="submit" class="btn btn-secondary btn-sm" style="border-color:var(--copper-primary); color:var(--copper-primary);">
-                      ثبت نرخ
-                    </button>
+                    
+                    <select name="pricing_mode" class="form-select mode-select" data-prod-id="{{ prod.id }}" style="padding:0.35rem 0.5rem; font-size:0.825rem;">
+                      <option value="manual" {% if prod.pricing_mode == 'manual' %}selected{% endif %}>🔵 نرخ‌گذاری دستی</option>
+                      <option value="api" {% if prod.pricing_mode == 'api' %}selected{% endif %}>🟢 خودکار (وب‌سرویس بورس/LME)</option>
+                      <option value="call" {% if prod.pricing_mode == 'call' %}selected{% endif %}>🟡 بدون نرخ (تماس بگیرید)</option>
+                    </select>
+                </td>
+                <td>
+                  <div id="price-status-{{ prod.id }}">
+                    {% if prod.pricing_mode == 'call' or prod.price == 0 %}
+                      <span class="badge-change neutral" style="background:var(--warning-bg); color:var(--warning-color); font-weight:800;">
+                        📞 تماس بگیرید
+                      </span>
+                    {% elif prod.pricing_mode == 'api' %}
+                      <div style="display:flex; flex-direction:column;">
+                        <strong style="color:var(--copper-primary); font-size:0.95rem;">{{ prod.price|intcomma }} تومان</strong>
+                        <span style="font-size:0.7rem; color:var(--success-color);">✓ متصل به وب‌سرویس</span>
+                      </div>
+                    {% else %}
+                      <div style="display:flex; flex-direction:column;">
+                        <strong style="color:var(--text-main); font-size:0.95rem;">{{ prod.price|intcomma }} تومان</strong>
+                        <span style="font-size:0.7rem; color:var(--text-muted);">نرخ دستی کارشناس</span>
+                      </div>
+                    {% endif %}
+                  </div>
+                </td>
+                <td>
+                  <div id="input-container-{{ prod.id }}" style="display:flex; align-items:center; gap:0.35rem; {% if prod.pricing_mode == 'call' %}opacity:0.4; pointer-events:none;{% endif %}">
+                    <input type="number" name="new_price" class="form-input" placeholder="نرخ جدید" value="{% if prod.price > 0 %}{{ prod.price }}{% endif %}" style="padding:0.35rem 0.5rem; font-size:0.85rem;" {% if prod.pricing_mode == 'call' %}disabled{% endif %}>
+                    <input type="text" name="note" class="form-input" placeholder="دلیل نوسان (اختیاری)" style="padding:0.35rem 0.5rem; font-size:0.8rem; width:130px;">
+                  </div>
+                </td>
+                <td>
+                  <button type="submit" class="btn btn-secondary btn-sm" style="border-color:var(--copper-primary); color:var(--copper-primary); padding:0.35rem 0.75rem;">
+                    ثبت
+                  </button>
                   </form>
                 </td>
               </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+    <!-- TAB 2: INQUIRIES & ORDERS PIPELINE -->
+    {% else %}
+      <div class="table-container">
+        <div style="padding:0.85rem 1.25rem; background:var(--bg-surface-elevated); border-bottom:1px solid var(--border-subtle); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
+          <div style="display:flex; gap:0.4rem;">
+            <a href="?tab=inquiries" class="btn btn-secondary btn-sm {% if not status_filter %}active{% endif %}">کل استعلام‌ها</a>
+            <a href="?tab=inquiries&status=pending" class="btn btn-secondary btn-sm {% if status_filter == 'pending' %}active{% endif %}" style="color:var(--warning-color);">در انتظار بررسی</a>
+            <a href="?tab=inquiries&status=quoted" class="btn btn-secondary btn-sm {% if status_filter == 'quoted' %}active{% endif %}" style="color:var(--copper-primary);">پیش‌فاکتور صادر شده</a>
+          </div>
+          <span style="font-size:0.75rem; color:var(--text-muted);">کارت‌ها به ترتیب جدیدترین مرتب شده‌اند</span>
+        </div>
+
+        <table class="price-table">
+          <thead>
+            <tr>
+              <th>کد رهگیری</th>
+              <th>خریدار و تماس</th>
+              <th>کالای درخواستی</th>
+              <th>مقدار</th>
+              <th>مقصد بار</th>
+              <th>وضعیت</th>
+              <th>مبلغ نهایی</th>
+              <th>اقدام</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for inq in inquiries %}
+              <tr>
+                <td><strong style="color:var(--copper-primary); direction:ltr; display:inline-block;">{{ inq.tracking_code }}</strong></td>
+                <td>
+                  <span class="product-cell-title">{{ inq.customer_name }}</span>
+                  <span class="product-cell-sub" dir="ltr">{{ inq.customer_phone }}</span>
+                </td>
+                <td>
+                  <span class="product-cell-title">{{ inq.product.title|default:inq.custom_product_title }}</span>
+                  {% if inq.product %}<span class="product-cell-sub">{{ inq.product.dimensions }}</span>{% endif %}
+                </td>
+                <td><strong>{{ inq.quantity }} {{ inq.unit }}</strong></td>
+                <td><span style="font-size:0.825rem; color:var(--text-muted);">{{ inq.destination_city }}</span></td>
+                <td>
+                  {% if inq.status == 'pending' %}
+                    <span class="badge-change neutral" style="color:var(--warning-color);">در انتظار نرخ</span>
+                  {% elif inq.status == 'quoted' %}
+                    <span class="badge-change up" style="background:var(--copper-light); color:var(--copper-primary);">پیش‌فاکتور صادر شد</span>
+                  {% elif inq.status == 'approved' %}
+                    <span class="badge-change up">تأیید مالی</span>
+                  {% else %}
+                    <span class="badge-change neutral">{{ inq.get_status_display }}</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if inq.final_amount > 0 %}
+                    <strong style="color:var(--text-main);">{{ inq.final_amount|intcomma }} تومان</strong>
+                  {% else %}
+                    <span style="color:var(--text-light); font-size:0.8rem;">در حال محاسبه</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div style="display:flex; gap:0.35rem;">
+                    <a href="{% url 'market:sales_quotation_edit' inq.tracking_code %}" class="btn btn-primary btn-sm">
+                      تعیین قیمت
+                    </a>
+                    <a href="{% url 'market:proforma_invoice' inq.tracking_code %}" class="btn btn-secondary btn-sm" target="_blank" title="چاپ فاکتور">
+                      فاکتور
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="8" style="text-align:center; padding:2rem;">استعلامی در این وضعیت یافت نشد.</td></tr>
             {% endfor %}
           </tbody>
         </table>
@@ -203,4 +232,32 @@
 
   </div>
 </section>
+
+<!-- Inline script for instant Pricing Mode Toggle -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const modeSelects = document.querySelectorAll('.mode-select');
+  modeSelects.forEach(sel => {
+    sel.addEventListener('change', function () {
+      const prodId = this.getAttribute('data-prod-id');
+      const inputContainer = document.getElementById('input-container-' + prodId);
+      const priceInput = inputContainer ? inputContainer.querySelector('input[name="new_price"]') : null;
+
+      if (this.value === 'call') {
+        if (inputContainer) {
+          inputContainer.style.opacity = '0.4';
+          inputContainer.style.pointerEvents = 'none';
+        }
+        if (priceInput) priceInput.disabled = true;
+      } else {
+        if (inputContainer) {
+          inputContainer.style.opacity = '1';
+          inputContainer.style.pointerEvents = 'auto';
+        }
+        if (priceInput) priceInput.disabled = false;
+      }
+    });
+  });
+});
+</script>
 {% endblock %}
