@@ -19,12 +19,12 @@
       </p>
     </div>
 
-    <!-- Quick Demo Accounts for Testing Different Roles -->
-    <div class="demo-login-box">
-      <div style="font-size:0.8rem; font-weight:700; color:var(--copper-primary); margin-bottom:0.35rem;">
-        ⚡ تست سریع با نقش‌های کاربری (یک کلیک):
-      </div>
-      <div class="demo-pills">
+    <!-- Quick Demo Accounts (for evaluation / testing) -->
+    <details class="demo-login-box" style="cursor:pointer; margin-bottom:1.5rem;">
+      <summary style="font-size:0.8rem; font-weight:700; color:var(--copper-primary); outline:none;">
+        🔑 راهنمای ورود سریع تستی (تفکیک نقش‌های کاربری)
+      </summary>
+      <div class="demo-pills" style="margin-top:0.75rem;">
         <form method="post" style="display:contents;">
           {% csrf_token %}
           <input type="hidden" name="demo_user" value="admin">
@@ -46,7 +46,7 @@
           <button type="submit" class="demo-btn">🏭 خریدار صنعتی (Buyer)</button>
         </form>
       </div>
-    </div>
+    </details>
 
     <!-- Regular Login Form -->
     <form method="post" action="{% url 'accounts:login' %}">
