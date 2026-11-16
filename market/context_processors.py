@@ -24,8 +24,9 @@ def market_global_context(request):
         'nav_categories': categories,
         'ticker_products': featured_ticker_products,
         'user_orders_count': user_orders_count,
-        'brand_name': 'فلز آنلاین',
-        'brand_tagline': 'مرجع تخصصی استعلام قیمت و تأمین مس و فلزات',
+        'brand_name': 'فلزی‌ها',
+        'brand_en': 'Feleziha',
+        'brand_tagline': 'مرجع تخصصی استعلام قیمت و معاملات مس و فلزات',
         'support_phone': '۰۲۱-۸۸۹۹۰۰۱۱',
         'support_mobile': '۰۹۱۲-۹۸۷۶۵۴۳',
     }

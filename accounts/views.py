@@ -70,7 +70,7 @@ def register_view(request):
             user.set_password(form.cleaned_data['password'])
             user.save()
             login(request, user)
-            messages.success(request, "ثبت‌نام شما با موفقیت تکمیل شد! به سامانه تخصصی فلز آنلاین خوش آمدید.")
+            messages.success(request, "ثبت‌نام شما با موفقیت تکمیل شد! به سامانه تخصصی فلزی‌ها (Feleziha) خوش آمدید.")
             return redirect('market:dashboard')
         else:
             messages.error(request, "لطفاً خطاهای فرم ثبت‌نام را بررسی و اصلاح فرمایید.")

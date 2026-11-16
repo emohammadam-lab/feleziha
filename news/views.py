@@ -63,7 +63,7 @@ def article_create_view(request):
         category_id = request.POST.get('category')
         summary = request.POST.get('summary')
         content = request.POST.get('content')
-        source = request.POST.get('source', 'تحریریه فلز آنلاین')
+        source = request.POST.get('source', 'تحریریه فلزی‌ها (Feleziha)')
         image_badge = request.POST.get('image_badge', 'تحلیل بازار')
         is_breaking = request.POST.get('is_breaking') == 'on'
 

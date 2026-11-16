@@ -1,5 +1,5 @@
 /**
- * FelezOnline - Core Frontend Scripts
+ * Feleziha (فلزی‌ها) - Core Frontend Scripts
  * - Day / Night Theme Toggle with LocalStorage
  * - Real-time Metal Weight & Price Calculator
  * - Metal Tabs Switcher

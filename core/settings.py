@@ -1,5 +1,5 @@
 """
-Django settings for FelezOnline (Iran Metal Market) project.
+Django settings for Feleziha (Iran Metal Market) project.
 """
 
 from pathlib import Path

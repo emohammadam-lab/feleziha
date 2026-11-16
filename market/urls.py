@@ -15,6 +15,7 @@ urlpatterns = [
     
     path('dashboard/', views.customer_dashboard_view, name='dashboard'),
     path('invoice/<str:tracking_code>/', views.proforma_invoice_view, name='proforma_invoice'),
+    path('proforma/<str:tracking_code>/', views.proforma_invoice_view, name='proforma_invoice_alt'),
     
     # Management & Sales Portal
     path('management/', views.management_dashboard_view, name='management_dashboard'),
