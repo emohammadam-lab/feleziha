@@ -89,7 +89,7 @@
 
 ۱. ورود به پوشه پروژه:
 ```bash
-cd /Users/mohammad/.gemini/antigravity/scratch/metalmarket
+cd /Users/mohammad/Documents/feleziha
 ```
 
 ۲. اجرای سرور توسعه با پایتون:
