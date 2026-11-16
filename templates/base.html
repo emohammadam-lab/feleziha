@@ -19,6 +19,13 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   
+  <!-- Favicons -->
+  <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon-32x32.png' %}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon-16x16.png' %}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/apple-touch-icon.png' %}">
+  <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}">
+
   <!-- CSRF Token for Secure AJAX Requests -->
   <meta name="csrf-token" content="{{ csrf_token }}">
 
@@ -81,22 +88,12 @@
   <header class="site-header">
     <div class="container header-main">
       
-      <!-- Brand Logo -->
-      <a href="{% url 'market:home' %}" class="brand-wrapper">
-        <div class="brand-logo-icon">
-          <!-- Copper ingot / metal bar icon -->
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-            <line x1="12" y1="22.08" x2="12" y2="12"></line>
-          </svg>
-        </div>
-        <div class="brand-text">
-          <div style="display:flex; align-items:baseline; gap:0.4rem;">
-            <h1>{{ brand_name }}</h1>
-            <span style="font-size:0.75rem; color:var(--copper-primary); font-weight:900; letter-spacing:0.75px; font-family:system-ui, -apple-system, sans-serif;">FELEZIHA</span>
-          </div>
-          <span>مرجع استعلام قیمت مس و فلزات</span>
+      <!-- Brand Logo with Day & Night Mode Support -->
+      <a href="{% url 'market:home' %}" class="brand-wrapper" title="{{ brand_name }} (Feleziha)">
+        <img src="{% static 'images/logo-header-day.png' %}" alt="{{ brand_name }} | Feleziha" class="brand-logo-img logo-day">
+        <img src="{% static 'images/logo-header-night.png' %}" alt="{{ brand_name }} | Feleziha" class="brand-logo-img logo-night">
+        <div class="brand-tagline-wrap">
+          <span class="brand-tagline">مرجع استعلام و معاملات مس و فلزات</span>
         </div>
       </a>
 
@@ -224,10 +221,13 @@
     <div class="container">
       <div class="footer-grid">
         
-        <!-- Col 1: About & Trust -->
-        <div class="footer-col">
-          <h4>{{ brand_name }}</h4>
-          <p style="margin-bottom: 1rem; line-height:1.7;">
+        <!-- Col 1: About & Trust with Official Logo (Day & Night) -->
+        <div class="footer-col footer-col-brand">
+          <div class="footer-logo-wrap" style="margin-bottom: 1.25rem;">
+            <img src="{% static 'images/logo-full-day.png' %}" alt="{{ brand_name }} (Feleziha)" class="footer-brand-logo logo-day" style="max-height: 95px; width: auto; object-fit: contain;">
+            <img src="{% static 'images/logo-full-night.png' %}" alt="{{ brand_name }} (Feleziha)" class="footer-brand-logo logo-night" style="max-height: 95px; width: auto; object-fit: contain;">
+          </div>
+          <p style="margin-bottom: 1rem; line-height:1.75; font-size: 0.875rem;">
             سامانه جامع استعلام لحظه‌ای و معاملات تخصصی مس، آلومینیوم، فولاد و مقاطع فلزی صنعتی. تأمین مستقیم از بورس کالای ایران و کارخانجات تراز اول با صدور پیش‌فاکتور رسمی و ضمانت کیفیت آنالیز.
           </p>
           <div style="font-size: 0.85rem;">
