@@ -21,10 +21,18 @@ def home_view(request):
     """
     categories = Category.objects.filter(is_active=True).prefetch_related('subcategories__products')
     
-    # Categorized products
+    # Categorized products (Focused on Copper & its specialized segments)
     copper_cat = Category.objects.filter(slug='copper').first()
-    copper_products = Product.objects.filter(subcategory__category=copper_cat)[:12] if copper_cat else Product.objects.all()[:12]
+    copper_products = Product.objects.filter(subcategory__category=copper_cat).order_by('subcategory__order', '-updated_at') if copper_cat else Product.objects.all()[:15]
     
+    # Specific copper subgroups for specialized tabs
+    export_rod_products = copper_products.filter(subcategory__slug__in=['copper-export-rod', 'copper-wire-rod'])
+    busbar_products = copper_products.filter(subcategory__slug='copper-busbar')
+    wire_conductor_products = copper_products.filter(subcategory__slug='copper-wire-conductor')
+    cathode_products = copper_products.filter(subcategory__slug='copper-cathode')
+    tube_sheet_products = copper_products.filter(subcategory__slug__in=['copper-tubes', 'copper-sheet-strip'])
+
+    # Preserved for future expansion (currently hidden/inactive)
     aluminum_cat = Category.objects.filter(slug='aluminum').first()
     aluminum_products = Product.objects.filter(subcategory__category=aluminum_cat)[:12] if aluminum_cat else []
 
@@ -49,6 +57,12 @@ def home_view(request):
     context = {
         'categories': categories,
         'copper_products': copper_products,
+        'export_rod_products': export_rod_products,
+        'busbar_products': busbar_products,
+        'wire_conductor_products': wire_conductor_products,
+        'cathode_products': cathode_products,
+        'tube_sheet_products': tube_sheet_products,
+        # Preserved in context for future use
         'aluminum_products': aluminum_products,
         'steel_products': steel_products,
         'other_products': other_products,
@@ -62,18 +76,19 @@ def home_view(request):
 def product_list_view(request, category_slug=None, subcategory_slug=None):
     """
     Catalog of metal products with category tree, filters, and search.
+    Defaults to active categories (copper).
     """
-    products = Product.objects.select_related('subcategory__category').all()
+    products = Product.objects.select_related('subcategory__category').filter(subcategory__category__is_active=True)
     active_category = None
     active_subcategory = None
 
     if category_slug:
         active_category = get_object_or_404(Category, slug=category_slug)
-        products = products.filter(subcategory__category=active_category)
+        products = Product.objects.select_related('subcategory__category').filter(subcategory__category=active_category)
     
     if subcategory_slug:
         active_subcategory = get_object_or_404(SubCategory, slug=subcategory_slug)
-        products = products.filter(subcategory=active_subcategory)
+        products = Product.objects.select_related('subcategory__category').filter(subcategory=active_subcategory)
         if not active_category:
             active_category = active_subcategory.category
 

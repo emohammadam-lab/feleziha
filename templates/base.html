@@ -35,7 +35,7 @@
 </head>
 <body>
 
-  <!-- ================= TOP TICKER BAR ================= -->
+  {% comment %} ================= TOP TICKER BAR (موقت کامنت‌شده - در صورت نیاز مجدداً فعال شود) =================
   <div class="top-ticker">
     <div class="container ticker-inner">
       <div class="ticker-label">
@@ -66,16 +66,6 @@
             <span class="price">۶۴۲,۰۰۰ تومان</span>
             <span class="badge-change up">▲ +۱.۷٪</span>
           </div>
-          <div class="ticker-item">
-            <span class="name">شمش آلومینیوم ایرالکو</span>
-            <span class="price">۲۳۸,۰۰۰ تومان</span>
-            <span class="badge-change up">▲ +۲.۵٪</span>
-          </div>
-          <div class="ticker-item">
-            <span class="name">میلگرد ۱۴ ذوب آهن</span>
-            <span class="price">۳۲,۴۰۰ تومان</span>
-            <span class="badge-change up">▲ +۱.۸٪</span>
-          </div>
         {% endfor %}
       </div>
       <div style="font-size: 0.775rem; color: #94a3b8; white-space: nowrap;">
@@ -83,6 +73,7 @@
       </div>
     </div>
   </div>
+  {% endcomment %}
 
   <!-- ================= SITE HEADER ================= -->
   <header class="site-header">
@@ -94,33 +85,33 @@
         <img src="{% static 'images/logo-header-night.png' %}" alt="{{ brand_name }} | Feleziha" class="brand-logo-img logo-night">
       </a>
 
-      <!-- Main Navigation with Elegant Dropdown Mega-Menu -->
+      <!-- Main Navigation (Focused on Copper & Its Specialized Products) -->
       <nav>
         <ul class="nav-links">
           <li>
             <a href="{% url 'market:home' %}" class="nav-link">صفحه اصلی</a>
           </li>
 
-          <!-- Market Categories Dropdown Mega-Menu -->
+          <!-- Copper Products Dropdown Menu -->
           <li class="nav-dropdown">
             <a href="{% url 'market:product_list' %}" class="nav-link nav-dropdown-trigger">
-              <span>بازار و قیمت فلزات</span>
+              <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--copper-primary);"></span>
+              <span>بازار تخصصی مس</span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
             </a>
 
             <!-- Dropdown Menu Content -->
-            <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-menu" style="min-width:320px;">
               {% for cat in nav_categories %}
-                <div class="nav-dropdown-category">
-                  <a href="{% url 'market:category_products' cat.slug %}" class="nav-dropdown-cat-title">
-                    <span style="color:var(--copper-primary);">●</span>
-                    <span>{{ cat.name }}</span>
-                  </a>
-                  <ul class="nav-dropdown-sublinks">
-                    {% for sub in cat.subcategories.all|slice:":4" %}
+                <div class="nav-dropdown-category" style="width:100%;">
+                  <div class="nav-dropdown-cat-title" style="color:var(--copper-primary); font-size:0.9rem; font-weight:800; border-bottom:1px solid var(--border-subtle); padding-bottom:0.4rem; margin-bottom:0.6rem;">
+                    <span>مقاطع و فرآورده‌های مس استاندارد</span>
+                  </div>
+                  <ul class="nav-dropdown-sublinks" style="display:grid; grid-template-columns:1fr; gap:0.4rem;">
+                    {% for sub in cat.subcategories.all %}
                       <li>
-                        <a href="{% url 'market:subcategory_products' sub.slug %}" class="nav-dropdown-sublink">
-                          <span>›</span>
+                        <a href="{% url 'market:subcategory_products' sub.slug %}" class="nav-dropdown-sublink" style="padding:0.4rem 0.6rem; border-radius:6px; font-weight:600;">
+                          <span style="color:var(--copper-primary); font-weight:bold;">›</span>
                           <span>{{ sub.name }}</span>
                         </a>
                       </li>
@@ -129,10 +120,10 @@
                 </div>
               {% endfor %}
               
-              <div style="grid-column: span 2; border-top: 1px solid var(--border-subtle); padding-top: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 0.8rem; color: var(--text-muted);">تأمین مستقیم انواع کاتد، شمش و مقاطع استاندارد</span>
-                <a href="{% url 'market:product_list' %}" style="font-size: 0.825rem; font-weight: 700; color: var(--copper-primary);">
-                  مشاهده کل کاتالوگ و مقاطع فلزی ←
+              <div style="border-top: 1px solid var(--border-subtle); padding-top: 0.75rem; margin-top:0.5rem; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.775rem; color: var(--text-muted);">تأمین مستقیم باسبار، مفتول، سیم و کاتد</span>
+                <a href="{% url 'market:product_list' %}" style="font-size: 0.8rem; font-weight: 700; color: var(--copper-primary);">
+                  مشاهده همه مقاطع مس ←
                 </a>
               </div>
             </div>
@@ -225,24 +216,28 @@
             <img src="{% static 'images/logo-full-night.png' %}" alt="{{ brand_name }} (Feleziha)" class="footer-brand-logo logo-night" style="max-height: 125px; width: auto; object-fit: contain;">
           </div>
           <p style="margin-bottom: 1rem; line-height:1.75; font-size: 0.875rem;">
-            سامانه جامع استعلام لحظه‌ای و معاملات تخصصی مس، آلومینیوم، فولاد و مقاطع فلزی صنعتی. تأمین مستقیم از بورس کالای ایران و کارخانجات تراز اول با صدور پیش‌فاکتور رسمی و ضمانت کیفیت آنالیز.
+            سامانه تخصصی استعلام لحظه‌ای و تأمین باسبار، مفتول صادراتی، سیم و هادی و کاتد مس. تأمین مستقیم از تالار بورس کالای ایران و کارخانجات تراز اول با صدور پیش‌فاکتور رسمی و ضمانت کیفیت آنالیز متالورژی.
           </p>
           <div style="font-size: 0.85rem;">
-            <div>شماره ثبت و شناسه ملی معتبر بازرگانی فلزات</div>
+            <div>شماره ثبت و شناسه ملی معتبر بازرگانی مس و فلزات</div>
             <div style="color:var(--copper-primary); margin-top:0.25rem; font-weight:700;">ساعات کاری: شنبه تا چهارشنبه ۸:۳۰ الی ۱۷:۳۰</div>
           </div>
         </div>
 
         <!-- Col 2: Categories -->
         <div class="footer-col">
-          <h4>بازار تخصصی فلزات</h4>
+          <h4>بازار تخصصی مس</h4>
           <ul class="footer-links">
-            <li><a href="{% url 'market:category_products' 'copper' %}">کاتد و مفتول مس سرچشمه</a></li>
-            <li><a href="{% url 'market:category_products' 'copper' %}">لوله و ورق مسی باهنر</a></li>
+            <li><a href="{% url 'market:subcategory_products' 'copper-export-rod' %}">مفتول مس صادراتی و راد ۸mm</a></li>
+            <li><a href="{% url 'market:subcategory_products' 'copper-busbar' %}">باسبار و شمش مسی تابلو برق</a></li>
+            <li><a href="{% url 'market:subcategory_products' 'copper-wire-conductor' %}">سیم لخت ارت و هادی مسی</a></li>
+            <li><a href="{% url 'market:subcategory_products' 'copper-cathode' %}">کاتد مس سرچشمه و بورس کالا</a></li>
+            <li><a href="{% url 'market:subcategory_products' 'copper-tubes' %}">لوله مسی برودتی و کلاف باهنر</a></li>
+            {% comment %} سایر فلزات در صورت نیاز در آینده فعال شوند:
             <li><a href="{% url 'market:category_products' 'aluminum' %}">شمش خالص آلومینیوم ایرالکو</a></li>
-            <li><a href="{% url 'market:category_products' 'aluminum' %}">پروفیل و ورق آلومینیوم</a></li>
             <li><a href="{% url 'market:category_products' 'steel' %}">میلگرد و تیرآهن اصفهان</a></li>
             <li><a href="{% url 'market:category_products' 'other-metals' %}">شمش روی کالسیمین و سرب</a></li>
+            {% endcomment %}
           </ul>
         </div>
 

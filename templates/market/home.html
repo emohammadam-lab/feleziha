@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static humanize %}
 
-{% block title %}{{ brand_name }} (Feleziha) | بازار تخصصی استعلام قیمت و خرید مس، آلومینیوم و فلزات{% endblock %}
+{% block title %}{{ brand_name }} (Feleziha) | بازار تخصصی باسبار، مفتول صادراتی و مقاطع مس{% endblock %}
 
 {% block content %}
 <!-- ================= 1. HERO SECTION ================= -->
@@ -12,20 +12,20 @@
     <div>
       <div style="display:inline-flex; align-items:center; gap:0.5rem; background:var(--copper-light); color:var(--copper-primary); padding:0.3rem 0.8rem; border-radius:20px; font-size:0.825rem; font-weight:700; margin-bottom:1rem; border:1px solid var(--copper-border);">
         <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--copper-primary);"></span>
-        <span>بورس کالای ایران & LME لندن • بروزرسانی امروز</span>
+        <span>بازار تخصصی مس • بورس کالای ایران و بازارهای صادراتی</span>
       </div>
 
       <h1 class="hero-title">
-        سامانه جامع استعلام قیمت و تأمین <span class="highlight">مس</span>، <span class="highlight">آلومینیوم</span> و مقاطع فلزی
+        سامانه تخصصی استعلام قیمت و تأمین <span class="highlight">باسبار</span>، <span class="highlight">مفتول صادراتی</span> و <span class="highlight">هادی‌های مس</span>
       </h1>
       
       <p class="hero-subtitle">
-        تأمین مستقیم انواع کاتد، مفتول، لوله و ورق مسی، شمش آلومینیوم و مقاطع فولادی با ضمانت رسمی آنالیز متالورژی و صدور پیش‌فاکتور فوری.
+        تأمین مستقیم باسبار و شمش تابلویی Cu-ETP، مفتول مس ۸ میلیمتر صادراتی، سیم و هادی‌های مسی، کاتد مس بورس کالا با ضمانت برگه آزمون متالورژی و صدور پیش‌فاکتور رسمی فوری.
       </p>
 
       <!-- Instant Search Form -->
       <form action="{% url 'market:product_list' %}" method="get" class="hero-search-box">
-        <input type="text" name="q" class="hero-search-input" placeholder="جستجوی محصول (مثال: کاتد مس سرچشمه، لوله مسی ۳/۸، شمش ایرالکو، میلگرد ۱۴)..." required>
+        <input type="text" name="q" class="hero-search-input" placeholder="جستجوی محصول (مثال: باسبار تابلویی، مفتول ۸ میلیمتر صادراتی، سیم لخت ارت، کاتد سرچشمه)..." required>
         <button type="submit" class="btn btn-primary" style="padding:0.75rem 1.5rem;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
           <span>استعلام قیمت</span>
@@ -39,12 +39,12 @@
           <div class="hero-stat-lbl">نرخ پایه کاتد مس (تومان/kg)</div>
         </div>
         <div class="hero-stat-card">
-          <div class="hero-stat-num">۲۳۸,۰۰۰</div>
-          <div class="hero-stat-lbl">شمش خالص آلومینیوم (تومان/kg)</div>
+          <div class="hero-stat-num">۸ mm</div>
+          <div class="hero-stat-lbl">مفتول صادراتی ASTM B49</div>
         </div>
         <div class="hero-stat-card">
-          <div class="hero-stat-num">۱۰۰٪</div>
-          <div class="hero-stat-lbl">تضمین برگه آنالیز آزمایشگاهی</div>
+          <div class="hero-stat-num">۹۹.۹۹٪</div>
+          <div class="hero-stat-lbl">تضمین خلوص با برگه کوانتومتری</div>
         </div>
       </div>
     </div>
@@ -64,18 +64,20 @@
       <form action="{% url 'market:inquiry_create' %}" method="post">
         {% csrf_token %}
         <div class="form-group">
-          <label class="form-label">انتخاب محصول یا مقطع فلزی</label>
+          <label class="form-label">انتخاب محصول یا مقطع مسی</label>
           <select name="product" class="form-select" required>
-            <option value="">-- انتخاب کنید --</option>
+            <option value="">-- انتخاب محصول مسی --</option>
             {% for prod in copper_products %}
               <option value="{{ prod.id }}">{{ prod.title }} ({{ prod.manufacturer }})</option>
             {% endfor %}
+            {% comment %} سایر فلزات موقتاً پنهان هستند - در صورت نیاز مجدداً فعال شوند:
             {% for prod in aluminum_products %}
               <option value="{{ prod.id }}">{{ prod.title }} ({{ prod.manufacturer }})</option>
             {% endfor %}
             {% for prod in steel_products %}
               <option value="{{ prod.id }}">{{ prod.title }} ({{ prod.manufacturer }})</option>
             {% endfor %}
+            {% endcomment %}
           </select>
         </div>
 
@@ -127,42 +129,45 @@
     
     <div class="section-header">
       <div>
-        <h2 class="section-title">تابلو روزانه قیمت مس و فلزات پایه</h2>
+        <h2 class="section-title">تابلو روزانه قیمت مس و مقاطع تخصصی</h2>
         <p style="font-size:0.875rem; color:var(--text-muted); margin-top:0.25rem;">
-          قیمت‌ها بر اساس آخرین معاملات تالار صنعتی بورس کالا و بازارهای معتبر به تومان است.
+          نرخ‌های استعلام زنده بر اساس آخرین معاملات تالار صنعتی بورس کالا و کارخانجات تراز اول به تومان
         </p>
       </div>
       <a href="{% url 'market:product_list' %}" class="btn btn-secondary btn-sm">
-        <span>مشاهده کل کاتالوگ و مقاطع</span>
+        <span>مشاهده کلیه مقاطع مس</span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
       </a>
     </div>
 
-    <!-- Category Filter Tabs -->
+    <!-- Specialized Copper Product Tabs -->
     <div class="metal-tabs">
-      <button class="metal-tab-btn active" data-target="pane-copper">
-        <span>مس و آلیاژها (Copper)</span>
+      <button class="metal-tab-btn active" data-target="pane-rod">
+        <span>مفتول صادراتی و راد مس</span>
       </button>
-      <button class="metal-tab-btn" data-target="pane-aluminum">
-        <span>آلومینیوم صنعتی (Aluminum)</span>
+      <button class="metal-tab-btn" data-target="pane-busbar">
+        <span>باسبار و شمش مسی</span>
       </button>
-      <button class="metal-tab-btn" data-target="pane-steel">
-        <span>آهن و فولاد (Iron & Steel)</span>
+      <button class="metal-tab-btn" data-target="pane-wire">
+        <span>سیم و هادی مسی</span>
       </button>
-      <button class="metal-tab-btn" data-target="pane-other">
-        <span>سایر فلزات (روی، سرب، برنج)</span>
+      <button class="metal-tab-btn" data-target="pane-cathode">
+        <span>کاتد مس بورس کالا</span>
+      </button>
+      <button class="metal-tab-btn" data-target="pane-tubes">
+        <span>لوله و ورق مسی</span>
       </button>
     </div>
 
-    <!-- PANE 1: COPPER -->
-    <div id="pane-copper" class="metal-tab-pane" style="display:block;">
+    <!-- PANE 1: EXPORT ROD -->
+    <div id="pane-rod" class="metal-tab-pane" style="display:block;">
       <div class="table-container">
         <table class="price-table">
           <thead>
             <tr>
-              <th>نام محصول و آلیاژ</th>
+              <th>نام محصول و گرید</th>
               <th>تولیدکننده / برند</th>
-              <th>ابعاد و مشخصات</th>
+              <th>سایز و مشخصات فنی</th>
               <th>واحد</th>
               <th>قیمت روز (تومان)</th>
               <th>نوسان روزانه</th>
@@ -171,7 +176,7 @@
             </tr>
           </thead>
           <tbody>
-            {% for prod in copper_products %}
+            {% for prod in export_rod_products %}
               <tr>
                 <td>
                   <a href="{% url 'market:product_detail' prod.slug %}" class="product-cell-title">{{ prod.title }}</a>
@@ -211,86 +216,22 @@
                 </td>
               </tr>
             {% empty %}
-              <tr><td colspan="8" style="text-align:center; padding:2rem;">هیچ محصول مسی ثبت نشده است.</td></tr>
+              <tr><td colspan="8" style="text-align:center; padding:2rem;">محصول مفتول صادراتی یافت نشد.</td></tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- PANE 2: ALUMINUM -->
-    <div id="pane-aluminum" class="metal-tab-pane" style="display:none;">
-      <div class="table-container">
-        <table class="price-table">
-          <thead>
-            <tr>
-              <th>نام محصول و آلیاژ</th>
-              <th>تولیدکننده / برند</th>
-              <th>ابعاد و مشخصات</th>
-              <th>واحد</th>
-              <th>قیمت روز (تومان)</th>
-              <th>نوسان روزانه</th>
-              <th>محل بارگیری</th>
-              <th>عملیات</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for prod in aluminum_products %}
-              <tr>
-                <td>
-                  <a href="{% url 'market:product_detail' prod.slug %}" class="product-cell-title">{{ prod.title }}</a>
-                  <span class="product-cell-sub">گرید: {{ prod.alloy_grade }}</span>
-                </td>
-                <td><strong style="color:var(--text-main);">{{ prod.manufacturer }}</strong></td>
-                <td><span style="font-size:0.85rem; color:var(--text-muted);">{{ prod.dimensions }}</span></td>
-                <td>{{ prod.unit }}</td>
-                <td class="price-cell">
-                  {% if prod.is_call_for_price %}
-                    <span style="color:var(--bronze-accent); font-size:0.875rem; font-weight:800; background:var(--warning-bg); padding:0.2rem 0.55rem; border-radius:4px; display:inline-block;">
-                      📞 تماس بگیرید
-                    </span>
-                  {% else %}
-                    {{ prod.price|intcomma }}
-                    {% if prod.is_api_pricing %}
-                      <span style="font-size:0.65rem; color:var(--success-color); font-weight:700; display:block;">(نرخ زنده بورس)</span>
-                    {% endif %}
-                  {% endif %}
-                </td>
-                <td>
-                  {% if prod.is_call_for_price %}
-                    <span class="badge-change neutral">استعلام روز</span>
-                  {% elif prod.is_price_up %}
-                    <span class="badge-change up">▲ +{{ prod.price_diff_percent }}%</span>
-                  {% elif prod.is_price_down %}
-                    <span class="badge-change down">▼ {{ prod.price_diff_percent }}%</span>
-                  {% else %}
-                    <span class="badge-change neutral">ثابت</span>
-                  {% endif %}
-                </td>
-                <td><span style="font-size:0.8rem; color:var(--text-muted);">{{ prod.warehouse_location }}</span></td>
-                <td>
-                  <a href="{% url 'market:product_detail' prod.slug %}" class="btn btn-outline-copper btn-sm">
-                    استعلام و خرید
-                  </a>
-                </td>
-              </tr>
-            {% empty %}
-              <tr><td colspan="8" style="text-align:center; padding:2rem;">محصول آلومینیوم یافت نشد.</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- PANE 3: STEEL -->
-    <div id="pane-steel" class="metal-tab-pane" style="display:none;">
+    <!-- PANE 2: BUSBAR -->
+    <div id="pane-busbar" class="metal-tab-pane" style="display:none;">
       <div class="table-container">
         <table class="price-table">
           <thead>
             <tr>
               <th>نام محصول و استاندارد</th>
-              <th>کارخانه سازنده</th>
-              <th>مشخصات سایز و طول</th>
+              <th>تولیدکننده / برند</th>
+              <th>ابعاد شین (میلیمتر)</th>
               <th>واحد</th>
               <th>قیمت روز (تومان)</th>
               <th>نوسان روزانه</th>
@@ -299,7 +240,71 @@
             </tr>
           </thead>
           <tbody>
-            {% for prod in steel_products %}
+            {% for prod in busbar_products %}
+              <tr>
+                <td>
+                  <a href="{% url 'market:product_detail' prod.slug %}" class="product-cell-title">{{ prod.title }}</a>
+                  <span class="product-cell-sub">گرید: {{ prod.alloy_grade }}</span>
+                </td>
+                <td><strong style="color:var(--text-main);">{{ prod.manufacturer }}</strong></td>
+                <td><span style="font-size:0.85rem; color:var(--text-muted);">{{ prod.dimensions }}</span></td>
+                <td>{{ prod.unit }}</td>
+                <td class="price-cell">
+                  {% if prod.is_call_for_price %}
+                    <span style="color:var(--bronze-accent); font-size:0.875rem; font-weight:800; background:var(--warning-bg); padding:0.2rem 0.55rem; border-radius:4px; display:inline-block;">
+                      📞 تماس بگیرید
+                    </span>
+                  {% else %}
+                    {{ prod.price|intcomma }}
+                    {% if prod.is_api_pricing %}
+                      <span style="font-size:0.65rem; color:var(--success-color); font-weight:700; display:block;">(نرخ زنده بورس)</span>
+                    {% endif %}
+                  {% endif %}
+                </td>
+                <td>
+                  {% if prod.is_call_for_price %}
+                    <span class="badge-change neutral">استعلام روز</span>
+                  {% elif prod.is_price_up %}
+                    <span class="badge-change up">▲ +{{ prod.price_diff_percent }}%</span>
+                  {% elif prod.is_price_down %}
+                    <span class="badge-change down">▼ {{ prod.price_diff_percent }}%</span>
+                  {% else %}
+                    <span class="badge-change neutral">ثابت</span>
+                  {% endif %}
+                </td>
+                <td><span style="font-size:0.8rem; color:var(--text-muted);">{{ prod.warehouse_location }}</span></td>
+                <td>
+                  <a href="{% url 'market:product_detail' prod.slug %}" class="btn btn-outline-copper btn-sm">
+                    استعلام و خرید
+                  </a>
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="8" style="text-align:center; padding:2rem;">محصول باسبار مسی یافت نشد.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PANE 3: WIRE & CONDUCTOR -->
+    <div id="pane-wire" class="metal-tab-pane" style="display:none;">
+      <div class="table-container">
+        <table class="price-table">
+          <thead>
+            <tr>
+              <th>نام محصول و استاندارد</th>
+              <th>کارخانه / برند سازنده</th>
+              <th>سطح مقطع و ساختار</th>
+              <th>واحد</th>
+              <th>قیمت روز (تومان)</th>
+              <th>نوسان روزانه</th>
+              <th>محل بارگیری</th>
+              <th>عملیات</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for prod in wire_conductor_products %}
               <tr>
                 <td>
                   <a href="{% url 'market:product_detail' prod.slug %}" class="product-cell-title">{{ prod.title }}</a>
@@ -339,35 +344,35 @@
                 </td>
               </tr>
             {% empty %}
-              <tr><td colspan="8" style="text-align:center; padding:2rem;">محصول فولادی یافت نشد.</td></tr>
+              <tr><td colspan="8" style="text-align:center; padding:2rem;">محصول سیم و هادی مسی یافت نشد.</td></tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- PANE 4: OTHER METALS -->
-    <div id="pane-other" class="metal-tab-pane" style="display:none;">
+    <!-- PANE 4: CATHODE -->
+    <div id="pane-cathode" class="metal-tab-pane" style="display:none;">
       <div class="table-container">
         <table class="price-table">
           <thead>
             <tr>
-              <th>نام فلز و عیار</th>
-              <th>مجتمع تولیدی</th>
-              <th>مشخصات و ابعاد قالب</th>
+              <th>نام کاتد و درجه خلوص</th>
+              <th>تولیدکننده (بورس کالا)</th>
+              <th>مشخصات پالت / بندل</th>
               <th>واحد</th>
               <th>قیمت روز (تومان)</th>
               <th>نوسان روزانه</th>
-              <th>محل بارگیری</th>
+              <th>محل تحویل</th>
               <th>عملیات</th>
             </tr>
           </thead>
           <tbody>
-            {% for prod in other_products %}
+            {% for prod in cathode_products %}
               <tr>
                 <td>
                   <a href="{% url 'market:product_detail' prod.slug %}" class="product-cell-title">{{ prod.title }}</a>
-                  <span class="product-cell-sub">عیار: {{ prod.alloy_grade }}</span>
+                  <span class="product-cell-sub">خلوص: {{ prod.alloy_grade }}</span>
                 </td>
                 <td><strong style="color:var(--text-main);">{{ prod.manufacturer }}</strong></td>
                 <td><span style="font-size:0.85rem; color:var(--text-muted);">{{ prod.dimensions }}</span></td>
@@ -403,12 +408,183 @@
                 </td>
               </tr>
             {% empty %}
-              <tr><td colspan="8" style="text-align:center; padding:2rem;">موردی یافت نشد.</td></tr>
+              <tr><td colspan="8" style="text-align:center; padding:2rem;">محصول کاتد مس یافت نشد.</td></tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
     </div>
+
+    <!-- PANE 5: TUBES & SHEETS -->
+    <div id="pane-tubes" class="metal-tab-pane" style="display:none;">
+      <div class="table-container">
+        <table class="price-table">
+          <thead>
+            <tr>
+              <th>نام کالا و استاندارد</th>
+              <th>تولیدکننده / برند</th>
+              <th>ابعاد / سایز / کلاف</th>
+              <th>واحد</th>
+              <th>قیمت روز (تومان)</th>
+              <th>نوسان روزانه</th>
+              <th>محل تحویل</th>
+              <th>عملیات</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for prod in tube_sheet_products %}
+              <tr>
+                <td>
+                  <a href="{% url 'market:product_detail' prod.slug %}" class="product-cell-title">{{ prod.title }}</a>
+                  <span class="product-cell-sub">گرید: {{ prod.alloy_grade }}</span>
+                </td>
+                <td><strong style="color:var(--text-main);">{{ prod.manufacturer }}</strong></td>
+                <td><span style="font-size:0.85rem; color:var(--text-muted);">{{ prod.dimensions }}</span></td>
+                <td>{{ prod.unit }}</td>
+                <td class="price-cell">
+                  {% if prod.is_call_for_price %}
+                    <span style="color:var(--bronze-accent); font-size:0.875rem; font-weight:800; background:var(--warning-bg); padding:0.2rem 0.55rem; border-radius:4px; display:inline-block;">
+                      📞 تماس بگیرید
+                    </span>
+                  {% else %}
+                    {{ prod.price|intcomma }}
+                    {% if prod.is_api_pricing %}
+                      <span style="font-size:0.65rem; color:var(--success-color); font-weight:700; display:block;">(نرخ زنده بورس)</span>
+                    {% endif %}
+                  {% endif %}
+                </td>
+                <td>
+                  {% if prod.is_call_for_price %}
+                    <span class="badge-change neutral">استعلام روز</span>
+                  {% elif prod.is_price_up %}
+                    <span class="badge-change up">▲ +{{ prod.price_diff_percent }}%</span>
+                  {% elif prod.is_price_down %}
+                    <span class="badge-change down">▼ {{ prod.price_diff_percent }}%</span>
+                  {% else %}
+                    <span class="badge-change neutral">ثابت</span>
+                  {% endif %}
+                </td>
+                <td><span style="font-size:0.8rem; color:var(--text-muted);">{{ prod.warehouse_location }}</span></td>
+                <td>
+                  <a href="{% url 'market:product_detail' prod.slug %}" class="btn btn-outline-copper btn-sm">
+                    استعلام و خرید
+                  </a>
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="8" style="text-align:center; padding:2rem;">محصول لوله یا ورق مس یافت نشد.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {% comment %} ================= PRESERVED FOR FUTURE METALS EXPANSION (آلومینیوم، فولاد و سایر فلزات) =================
+    <!-- PANE: ALUMINUM -->
+    <div id="pane-aluminum" class="metal-tab-pane" style="display:none;">
+      <div class="table-container">
+        <table class="price-table">
+          <thead>
+            <tr>
+              <th>نام محصول و آلیاژ</th>
+              <th>تولیدکننده / برند</th>
+              <th>ابعاد و مشخصات</th>
+              <th>واحد</th>
+              <th>قیمت روز (تومان)</th>
+              <th>نوسان روزانه</th>
+              <th>محل بارگیری</th>
+              <th>عملیات</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for prod in aluminum_products %}
+              <tr>
+                <td>
+                  <a href="{% url 'market:product_detail' prod.slug %}" class="product-cell-title">{{ prod.title }}</a>
+                  <span class="product-cell-sub">گرید: {{ prod.alloy_grade }}</span>
+                </td>
+                <td><strong style="color:var(--text-main);">{{ prod.manufacturer }}</strong></td>
+                <td><span style="font-size:0.85rem; color:var(--text-muted);">{{ prod.dimensions }}</span></td>
+                <td>{{ prod.unit }}</td>
+                <td class="price-cell">{{ prod.price|intcomma }}</td>
+                <td><span class="badge-change neutral">ثابت</span></td>
+                <td><span>{{ prod.warehouse_location }}</span></td>
+                <td><a href="{% url 'market:product_detail' prod.slug %}" class="btn btn-outline-copper btn-sm">استعلام</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PANE: STEEL -->
+    <div id="pane-steel" class="metal-tab-pane" style="display:none;">
+      <div class="table-container">
+        <table class="price-table">
+          <thead>
+            <tr>
+              <th>نام محصول و استاندارد</th>
+              <th>کارخانه سازنده</th>
+              <th>مشخصات سایز و طول</th>
+              <th>واحد</th>
+              <th>قیمت روز (تومان)</th>
+              <th>نوسان روزانه</th>
+              <th>محل بارگیری</th>
+              <th>عملیات</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for prod in steel_products %}
+              <tr>
+                <td>{{ prod.title }}</td>
+                <td>{{ prod.manufacturer }}</td>
+                <td>{{ prod.dimensions }}</td>
+                <td>{{ prod.unit }}</td>
+                <td>{{ prod.price|intcomma }}</td>
+                <td><span class="badge-change neutral">ثابت</span></td>
+                <td>{{ prod.warehouse_location }}</td>
+                <td><a href="{% url 'market:product_detail' prod.slug %}" class="btn btn-outline-copper btn-sm">استعلام</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PANE: OTHER METALS -->
+    <div id="pane-other" class="metal-tab-pane" style="display:none;">
+      <div class="table-container">
+        <table class="price-table">
+          <thead>
+            <tr>
+              <th>نام فلز و عیار</th>
+              <th>مجتمع تولیدی</th>
+              <th>مشخصات و ابعاد قالب</th>
+              <th>واحد</th>
+              <th>قیمت روز (تومان)</th>
+              <th>نوسان روزانه</th>
+              <th>محل بارگیری</th>
+              <th>عملیات</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for prod in other_products %}
+              <tr>
+                <td>{{ prod.title }}</td>
+                <td>{{ prod.manufacturer }}</td>
+                <td>{{ prod.dimensions }}</td>
+                <td>{{ prod.unit }}</td>
+                <td>{{ prod.price|intcomma }}</td>
+                <td><span class="badge-change neutral">ثابت</span></td>
+                <td>{{ prod.warehouse_location }}</td>
+                <td><a href="{% url 'market:product_detail' prod.slug %}" class="btn btn-outline-copper btn-sm">استعلام</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endcomment %}
 
   </div>
 </section>
@@ -418,9 +594,9 @@
   <div class="container">
     <div class="section-header">
       <div>
-        <h2 class="section-title">محاسبه‌گر آنلاین وزن و بهای فلزات صنعتی</h2>
+        <h2 class="section-title">محاسبه‌گر آنلاین وزن و بهای فلزات (مس و مقاطع تخصصی)</h2>
         <p style="font-size:0.875rem; color:var(--text-muted); margin-top:0.25rem;">
-          محاسبه دقیق وزن بر اساس چگالی متالورژیکی (مس، آلومینیوم، فولاد و برنج) و برآورد مبلغ تقریبی بر مبنای نرخ روز
+          محاسبه دقیق وزن بر اساس چگالی متالورژیکی مس خالص (8.96 g/cm³) و برآورد مبلغ تقریبی بر مبنای نرخ روز بورس
         </p>
       </div>
     </div>
@@ -434,21 +610,23 @@
             <div class="form-group">
               <label class="form-label">نوع فلز</label>
               <select id="calc-metal" class="form-select">
-                <option value="copper">مس خالص (چگالی: 8.96 g/cm³)</option>
+                <option value="copper" selected>مس خالص و الکتریکال (چگالی: 8.96 g/cm³)</option>
+                {% comment %} سایر فلزات در صورت توسعه در آینده فعال شوند:
                 <option value="aluminum">آلومینیوم (چگالی: 2.70 g/cm³)</option>
                 <option value="steel">فولاد / آهن (چگالی: 7.85 g/cm³)</option>
                 <option value="brass">برنج صنعتی (چگالی: 8.50 g/cm³)</option>
                 <option value="zinc">روی خالص (چگالی: 7.14 g/cm³)</option>
+                {% endcomment %}
               </select>
             </div>
 
             <div class="form-group">
               <label class="form-label">نوع مقطع / شکل هندسی</label>
               <select id="calc-shape" class="form-select">
-                <option value="sheet">ورق یا صفحه تخت (Sheet)</option>
-                <option value="tube">لوله گرد توخالی (Tube)</option>
-                <option value="rod">میلگرد یا مفتول گرد (Rod)</option>
-                <option value="strip">تسمه مستطیلی (Strip)</option>
+                <option value="strip">باسبار و شین یا تسمه مس (Busbar / Strip)</option>
+                <option value="rod">مفتول صادراتی یا میلگرد مس (Wire Rod)</option>
+                <option value="sheet">ورق یا پلیت مس (Copper Sheet)</option>
+                <option value="tube">لوله مسی برودتی و صنعتی (Tube)</option>
               </select>
             </div>
           </div>
@@ -582,9 +760,9 @@
         <div style="width:52px; height:52px; border-radius:12px; background:var(--copper-light); color:var(--copper-primary); margin:0 auto 1.25rem; display:flex; align-items:center; justify-content:center;">
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
         </div>
-        <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:0.5rem;">تضمین آنالیز آزمایشگاهی</h3>
+        <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:0.5rem;">تضمین آنالیز متالورژی</h3>
         <p style="font-size:0.85rem; color:var(--text-muted); line-height:1.6;">
-          کلیه محموله‌های کاتد، مفتول مس و شمش آلومینیوم با شناسنامه فنی و برگه آزمون کوانتومتری معتبر تحویل می‌گردند.
+          کلیه محموله‌های باسبار مسی Cu-ETP، مفتول مس ۸ میلیمتر صادراتی و کاتد با شناسنامه فنی و برگه آزمون کوانتومتری معتبر تحویل می‌گردند.
         </p>
       </div>
 
