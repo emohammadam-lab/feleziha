@@ -22,4 +22,20 @@ urlpatterns = [
     path('management/fast-price-update/', views.fast_price_update_api, name='fast_price_update'),
     path('management/sync-api-prices/', views.sync_all_api_view, name='sync_api_prices'),
     path('management/quote/<str:tracking_code>/', views.sales_quotation_edit_view, name='sales_quotation_edit'),
+    
+    # CMS Content Blocks Endpoints
+    path('management/blocks/save/', views.block_save_view, name='block_create'),
+    path('management/blocks/<int:block_id>/save/', views.block_save_view, name='block_edit'),
+    path('management/blocks/<int:block_id>/delete/', views.block_delete_view, name='block_delete'),
+    
+    # Media Assets Endpoints
+    path('management/media/save/', views.media_save_view, name='media_create'),
+    path('management/media/<int:media_id>/save/', views.media_save_view, name='media_edit'),
+    path('management/media/<int:media_id>/delete/', views.media_delete_view, name='media_delete'),
+    
+    # Staff Permissions Endpoint
+    path('management/staff/<int:user_id>/perms/', views.staff_permission_save_view, name='staff_permission_save'),
+    
+    # Public Media Gallery Showcase
+    path('gallery/', views.gallery_public_view, name='gallery'),
 ]

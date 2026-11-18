@@ -11,7 +11,7 @@ class CustomUserAdmin(UserAdmin):
     ordering = ('-date_joined',)
     
     fieldsets = UserAdmin.fieldsets + (
-        ('اطلاعات تکمیلی و حقوق دسترسی سازمانی', {
+        ('اطلاعات تکمیلی سازمانی', {
             'fields': (
                 'role',
                 'phone_number',
@@ -21,6 +21,15 @@ class CustomUserAdmin(UserAdmin):
                 'address',
                 'postal_code',
                 'is_verified'
+            )
+        }),
+        ('مجوزها و سطوح دسترسی سفارشی (RBAC)', {
+            'fields': (
+                'can_manage_prices',
+                'can_manage_content',
+                'can_manage_media',
+                'can_view_inquiries',
+                'can_manage_users'
             )
         }),
     )

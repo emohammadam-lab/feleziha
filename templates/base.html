@@ -179,6 +179,12 @@
           </li>
 
           <li>
+            <a href="{% url 'market:gallery' %}" class="nav-link">
+              <span>گالری تصاویر و ویدیوها</span>
+            </a>
+          </li>
+
+          <li>
             <a href="{% url 'news:news_list' %}" class="nav-link">اخبار و تحلیل بورس</a>
           </li>
 
@@ -263,7 +269,7 @@
             <img src="{% static 'images/logo-full-night.png' %}" alt="{{ brand_name }} (Feleziha)" class="footer-brand-logo logo-night" style="max-height: 125px; width: auto; object-fit: contain;">
           </div>
           <p style="margin-bottom: 1rem; line-height:1.75; font-size: 0.875rem;">
-            سامانه تخصصی استعلام لحظه‌ای و تأمین باسبار، مفتول صادراتی، سیم و هادی و کاتد مس. تأمین مستقیم از تالار بورس کالای ایران و کارخانجات تراز اول با صدور پیش‌فاکتور رسمی و ضمانت کیفیت آنالیز متالورژی.
+            {{ site_blocks.footer_about.content|default:"سامانه تخصصی استعلام لحظه‌ای و تأمین باسبار، مفتول صادراتی، سیم و هادی و کاتد مس. تأمین مستقیم از تالار بورس کالای ایران و کارخانجات تراز اول با صدور پیش‌فاکتور رسمی و ضمانت کیفیت آنالیز متالورژی." }}
           </p>
           <div style="font-size: 0.85rem;">
             <div>شماره ثبت و شناسه ملی معتبر بازرگانی مس و فلزات</div>
@@ -293,6 +299,7 @@
           <h4>امور مشتریان و خدمات</h4>
           <ul class="footer-links">
             <li><a href="{% url 'market:inquiry_create' %}">درخواست پیش‌فاکتور رسمی</a></li>
+            <li><a href="{% url 'market:gallery' %}">گالری رسانه‌ها و کارخانجات مس</a></li>
             <li><a href="{% url 'market:home' %}#calculator-section">محاسبه آنلاین وزن مقاطع</a></li>
             <li><a href="{% url 'news:news_list' %}">گزارش معاملات تالار بورس کالا</a></li>
             <li><a href="{% url 'accounts:login' %}">ورود به پنل خریداران</a></li>

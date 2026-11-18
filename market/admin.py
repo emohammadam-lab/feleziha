@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, SubCategory, Product, PriceHistory, OrderInquiry
+from .models import Category, SubCategory, Product, PriceHistory, OrderInquiry, SiteContentBlock, MediaAsset
 
 
 @admin.register(Category)
@@ -76,3 +76,28 @@ class OrderInquiryAdmin(admin.ModelAdmin):
             'fields': ('created_at', 'updated_at')
         })
     )
+
+
+@admin.register(SiteContentBlock)
+class SiteContentBlockAdmin(admin.ModelAdmin):
+    list_display = ('title', 'key', 'section', 'order', 'is_active', 'updated_at')
+    list_filter = ('section', 'is_active')
+    search_fields = ('title', 'key', 'content')
+    list_editable = ('order', 'is_active')
+    fieldsets = (
+        ('مشخصات بلاک محتوایی', {
+            'fields': ('key', 'title', 'subtitle', 'section', 'order', 'is_active')
+        }),
+        ('متن و مدیا', {
+            'fields': ('content', 'image', 'link_url', 'link_text')
+        }),
+    )
+
+
+@admin.register(MediaAsset)
+class MediaAssetAdmin(admin.ModelAdmin):
+    list_display = ('title', 'media_type', 'category_tag', 'is_featured', 'is_active', 'order', 'created_at')
+    list_filter = ('media_type', 'is_featured', 'is_active', 'category_tag')
+    search_fields = ('title', 'caption', 'category_tag')
+    list_editable = ('is_featured', 'is_active', 'order')
+

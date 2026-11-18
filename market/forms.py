@@ -1,5 +1,5 @@
 from django import forms
-from .models import OrderInquiry, Product
+from .models import OrderInquiry, Product, SiteContentBlock, MediaAsset
 
 
 class OrderInquiryForm(forms.ModelForm):
@@ -44,3 +44,38 @@ class FastPriceUpdateForm(forms.Form):
     product_id = forms.IntegerField(widget=forms.HiddenInput())
     new_price = forms.IntegerField(widget=forms.NumberInput(attrs={'class': 'form-input py-1 text-sm', 'placeholder': 'قیمت جدید'}))
     change_note = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-input py-1 text-sm', 'placeholder': 'دلیل نوسان (اختیاری)'}))
+
+
+class SiteContentBlockForm(forms.ModelForm):
+    class Meta:
+        model = SiteContentBlock
+        fields = ['title', 'key', 'subtitle', 'content', 'image', 'link_url', 'link_text', 'section', 'order', 'is_active']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'عنوان بلاک محتوایی'}),
+            'key': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'مثال: hero_title یا about_text (حروف لاتین و خط تیره)'}),
+            'subtitle': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'زیرعنوان یا برچسب کوتاه (اختیاری)'}),
+            'content': forms.Textarea(attrs={'class': 'form-input', 'rows': 4, 'placeholder': 'متن، توضیحات یا کدهای HTML بلاک'}),
+            'link_url': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'مثال: /products/ یا #inquiry'}),
+            'link_text': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'مثال: استعلام فوری'}),
+            'section': forms.Select(attrs={'class': 'form-select'}),
+            'order': forms.NumberInput(attrs={'class': 'form-input', 'style': 'max-width:100px;'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-checkbox'}),
+        }
+
+
+class MediaAssetForm(forms.ModelForm):
+    class Meta:
+        model = MediaAsset
+        fields = ['title', 'media_type', 'file', 'thumbnail', 'external_url', 'caption', 'category_tag', 'is_featured', 'is_active', 'order']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'عنوان رسانه یا فایل'}),
+            'media_type': forms.Select(attrs={'class': 'form-select'}),
+            'file': forms.FileInput(attrs={'class': 'form-input'}),
+            'thumbnail': forms.FileInput(attrs={'class': 'form-input'}),
+            'external_url': forms.URLInput(attrs={'class': 'form-input', 'placeholder': 'لینک ویدیو یا آپارات (اختیاری)'}),
+            'caption': forms.Textarea(attrs={'class': 'form-input', 'rows': 2, 'placeholder': 'توضیحات کوتاه یا زیرنویس فنی فایل'}),
+            'category_tag': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'مثال: باسبار باهنر، دنیای مس، آزمایشگاه'}),
+            'order': forms.NumberInput(attrs={'class': 'form-input', 'style': 'max-width:100px;'}),
+            'is_featured': forms.CheckboxInput(attrs={'class': 'form-checkbox'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-checkbox'}),
+        }

@@ -4,10 +4,13 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.db.models import Q
-from .models import Category, SubCategory, Product, PriceHistory, OrderInquiry
-from .forms import OrderInquiryForm, SalesQuotationUpdateForm
+from django.contrib.auth import get_user_model
+from .models import Category, SubCategory, Product, PriceHistory, OrderInquiry, SiteContentBlock, MediaAsset
+from .forms import OrderInquiryForm, SalesQuotationUpdateForm, SiteContentBlockForm, MediaAssetForm
 from .pricing_service import sync_all_api_products, calculate_formula_price
 from news.models import Article
+
+User = get_user_model()
 
 
 def home_view(request):
@@ -54,6 +57,10 @@ def home_view(request):
             'delivery_address': request.user.address or '',
         }
 
+    # Media Gallery Showcase (عکس، فیلم و سرتیفیکیت کارخانجات)
+    featured_media = MediaAsset.objects.filter(is_active=True).order_by('order', '-created_at')[:6]
+    media_count = MediaAsset.objects.filter(is_active=True).count()
+
     context = {
         'categories': categories,
         'copper_products': copper_products,
@@ -62,6 +69,8 @@ def home_view(request):
         'wire_conductor_products': wire_conductor_products,
         'cathode_products': cathode_products,
         'tube_sheet_products': tube_sheet_products,
+        'featured_media': featured_media,
+        'media_count': media_count,
         # Preserved in context for future use
         'aluminum_products': aluminum_products,
         'steel_products': steel_products,
@@ -239,11 +248,23 @@ def proforma_invoice_view(request, tracking_code):
 @login_required
 def management_dashboard_view(request):
     """
-    Clean, focused, and simplified management control center:
+    User-Friendly & Unified Management Control Center:
     - Tab 1: Pricing Board (Manual, Auto-API, Call-for-price)
     - Tab 2: Orders & Inquiries pipeline
+    - Tab 3: CMS Content Blocks (Every block on the website)
+    - Tab 4: Media Gallery (Photos, Videos, PDF Catalogs)
+    - Tab 5: Team Staff & Granular RBAC Permissions
     """
-    if not (request.user.is_admin_role or request.user.is_sales_role or request.user.is_content_role):
+    has_any_perm = (
+        request.user.is_admin_role or
+        request.user.is_sales_role or
+        request.user.is_content_role or
+        request.user.has_price_perm() or
+        request.user.has_content_perm() or
+        request.user.has_media_perm() or
+        request.user.has_inquiry_perm()
+    )
+    if not has_any_perm:
         messages.error(request, "شما دسترسی مجاز به پنل مدیریت را ندارید.")
         return redirect('market:home')
 
@@ -256,6 +277,15 @@ def management_dashboard_view(request):
 
     products = Product.objects.select_related('subcategory__category').all().order_by('subcategory__category', 'title')
 
+    # Content Blocks (CMS)
+    content_blocks = SiteContentBlock.objects.all().order_by('section', 'order')
+
+    # Media Assets (Gallery)
+    media_assets = MediaAsset.objects.all().order_by('order', '-created_at')
+
+    # Staff Members (Permissions)
+    staff_users = User.objects.filter(is_staff=True).order_by('-date_joined')
+
     # Concise stats
     stats = {
         'inquiries_pending': OrderInquiry.objects.filter(status=OrderInquiry.Status.PENDING).count(),
@@ -264,16 +294,26 @@ def management_dashboard_view(request):
         'products_api': products.filter(pricing_mode=Product.PricingMode.AUTO_API).count(),
         'products_call': products.filter(pricing_mode=Product.PricingMode.CALL).count(),
         'products_manual': products.filter(pricing_mode=Product.PricingMode.MANUAL).count(),
+        'blocks_total': content_blocks.count(),
+        'media_total': media_assets.count(),
+        'staff_total': staff_users.count(),
     }
 
     context = {
-        'inquiries': inquiries_qs[:30],
+        'inquiries': inquiries_qs[:35],
         'products': products,
+        'content_blocks': content_blocks,
+        'media_assets': media_assets,
+        'staff_users': staff_users,
+        'block_form': SiteContentBlockForm(),
+        'media_form': MediaAssetForm(),
         'stats': stats,
         'active_tab': active_tab,
         'status_filter': status_filter,
         'status_choices': OrderInquiry.Status.choices,
         'pricing_mode_choices': Product.PricingMode.choices,
+        'section_choices': SiteContentBlock.Section.choices,
+        'media_type_choices': MediaAsset.MediaType.choices,
     }
     return render(request, 'market/management_dashboard.html', context)
 
@@ -306,8 +346,8 @@ def fast_price_update_api(request):
     2. Switch to Auto-API pricing
     3. Set to 'Call for price' (بدون نرخ / تماس بگیرید)
     """
-    if not (request.user.is_admin_role or request.user.is_sales_role):
-        return JsonResponse({'status': 'error', 'message': 'عدم دسترسی مجاز'}, status=403)
+    if not request.user.has_price_perm():
+        return JsonResponse({'status': 'error', 'message': 'عدم دسترسی مجاز برای تغییر قیمت'}, status=403)
 
     if request.method == 'POST':
         product_id = request.POST.get('product_id')
@@ -442,3 +482,167 @@ def sales_quotation_edit_view(request, tracking_code):
         form = SalesQuotationUpdateForm(instance=order)
 
     return render(request, 'market/sales_quotation_edit.html', {'order': order, 'form': form})
+
+
+# ========================================================
+# CMS CONTENT BLOCKS MANAGEMENT (ویرایش تمام بخش‌های محتوایی سایت)
+# ========================================================
+
+@login_required
+def block_save_view(request, block_id=None):
+    """
+    Create or edit a dynamic CMS content block.
+    """
+    if not request.user.has_content_perm():
+        messages.error(request, "شما مجوز ویرایش بلاک‌های متنی و محتوای سایت را ندارید.")
+        return redirect('market:management_dashboard')
+
+    instance = get_object_or_404(SiteContentBlock, id=block_id) if block_id else None
+
+    if request.method == 'POST':
+        form = SiteContentBlockForm(request.POST, request.FILES, instance=instance)
+        if form.is_valid():
+            block = form.save()
+            messages.success(request, f"بلاک محتوایی «{block.title}» با موفقیت ذخیره شد.")
+            return redirect('/management/?tab=content_blocks')
+        else:
+            messages.error(request, f"خطا در فرم بلاک محتوایی: {form.errors.as_text()}")
+    
+    return redirect('/management/?tab=content_blocks')
+
+
+@login_required
+def block_delete_view(request, block_id):
+    """
+    Delete a CMS content block.
+    """
+    if not request.user.has_content_perm():
+        messages.error(request, "عدم دسترسی مجاز برای حذف محتوا.")
+        return redirect('market:management_dashboard')
+
+    block = get_object_or_404(SiteContentBlock, id=block_id)
+    title = block.title
+    block.delete()
+    messages.success(request, f"بلاک محتوایی «{title}» حذف شد.")
+    return redirect('/management/?tab=content_blocks')
+
+
+# ========================================================
+# MEDIA GALLERY ASSETS MANAGEMENT (گالری تصاویر و ویدیوها)
+# ========================================================
+
+@login_required
+def media_save_view(request, media_id=None):
+    """
+    Upload and save photos, video clips, or PDF documents.
+    """
+    if not request.user.has_media_perm():
+        messages.error(request, "شما مجوز بارگذاری و مدیریت رسانه‌ها را ندارید.")
+        return redirect('market:management_dashboard')
+
+    instance = get_object_or_404(MediaAsset, id=media_id) if media_id else None
+
+    if request.method == 'POST':
+        form = MediaAssetForm(request.POST, request.FILES, instance=instance)
+        if form.is_valid():
+            media = form.save(commit=False)
+            if not media.uploaded_by:
+                media.uploaded_by = request.user
+            media.save()
+            messages.success(request, f"فایل «{media.title}» با موفقیت در گالری ثبت شد.")
+            return redirect('/management/?tab=media_gallery')
+        else:
+            messages.error(request, f"خطا در بارگذاری رسانه: {form.errors.as_text()}")
+
+    return redirect('/management/?tab=media_gallery')
+
+
+@login_required
+def media_delete_view(request, media_id):
+    """
+    Delete a media asset from the gallery.
+    """
+    if not request.user.has_media_perm():
+        messages.error(request, "عدم دسترسی مجاز برای حذف رسانه.")
+        return redirect('market:management_dashboard')
+
+    media = get_object_or_404(MediaAsset, id=media_id)
+    title = media.title
+    media.delete()
+    messages.success(request, f"رسانه «{title}» با موفقیت حذف گردید.")
+    return redirect('/management/?tab=media_gallery')
+
+
+# ========================================================
+# STAFF PERMISSIONS (تنظیم دقیق سطوح دسترسی کاربران و همکاران)
+# ========================================================
+
+@login_required
+def staff_permission_save_view(request, user_id):
+    """
+    Admin updates roles and granular RBAC permission checkboxes for team staff.
+    """
+    if not request.user.has_user_perm():
+        messages.error(request, "تنها مدیران ارشد مجاز به تغییر سطوح دسترسی پرسنل هستند.")
+        return redirect('market:management_dashboard')
+
+    target_user = get_object_or_404(User, id=user_id)
+
+    if request.method == 'POST':
+        new_role = request.POST.get('role', target_user.role)
+        target_user.role = new_role
+        target_user.can_manage_prices = (request.POST.get('can_manage_prices') == 'on')
+        target_user.can_manage_content = (request.POST.get('can_manage_content') == 'on')
+        target_user.can_manage_media = (request.POST.get('can_manage_media') == 'on')
+        target_user.can_view_inquiries = (request.POST.get('can_view_inquiries') == 'on')
+        target_user.can_manage_users = (request.POST.get('can_manage_users') == 'on')
+        target_user.is_active = (request.POST.get('is_active') == 'on')
+
+        # If admin, ensure staff status and full perms
+        if new_role == User.Role.ADMIN:
+            target_user.is_staff = True
+            target_user.can_manage_prices = True
+            target_user.can_manage_content = True
+            target_user.can_manage_media = True
+            target_user.can_view_inquiries = True
+            target_user.can_manage_users = True
+        elif new_role in [User.Role.SALES, User.Role.CONTENT]:
+            target_user.is_staff = True
+
+        target_user.save()
+        messages.success(request, f"حقوق دسترسی کاربر «{target_user.username}» با موفقیت ذخیره شد.")
+        return redirect('/management/?tab=staff_perms')
+
+    return redirect('/management/?tab=staff_perms')
+
+
+# ========================================================
+# PUBLIC MEDIA GALLERY PAGE (گالری چندرسانه‌ای کارخانجات مس)
+# ========================================================
+
+def gallery_public_view(request):
+    """
+    Public media showcase of factory lines, copper busbars, wire rods,
+    and metallurgical test certificates (Ahan Online & Taban Mes style).
+    """
+    media_type = request.GET.get('type', 'all')
+    tag = request.GET.get('tag', '')
+
+    assets_qs = MediaAsset.objects.filter(is_active=True).order_by('order', '-created_at')
+
+    if media_type != 'all':
+        assets_qs = assets_qs.filter(media_type=media_type)
+    if tag:
+        assets_qs = assets_qs.filter(category_tag=tag)
+
+    # Unique category tags for filtering
+    tags = MediaAsset.objects.filter(is_active=True).values_list('category_tag', flat=True).distinct()
+
+    context = {
+        'assets': assets_qs,
+        'current_type': media_type,
+        'current_tag': tag,
+        'tags': tags,
+        'media_type_choices': MediaAsset.MediaType.choices,
+    }
+    return render(request, 'market/gallery.html', context)

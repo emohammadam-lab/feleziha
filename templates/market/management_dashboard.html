@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static humanize %}
 
-{% block title %}میز مدیریت نرخ‌گذاری و سفارشات | {{ brand_name }}{% endblock %}
+{% block title %}میز مدیریت و کنترل متمرکز | {{ brand_name }}{% endblock %}
 
 {% block content %}
 <section class="section" style="padding-top:1.5rem;">
@@ -12,39 +12,40 @@
       <div>
         <div style="display:flex; align-items:center; gap:0.6rem;">
           <h1 style="font-size:1.5rem; font-weight:900; color:var(--text-main);">
-            میز مدیریت نرخ‌گذاری و سفارشات
+            میز مدیریت نرخ‌گذاری و سفارشات (کنترل یکپارچه فلزی‌ها)
           </h1>
           <span style="background:var(--copper-light); color:var(--copper-primary); font-size:0.775rem; font-weight:800; padding:0.2rem 0.6rem; border-radius:6px; border:1px solid var(--copper-border);">
             {{ user.get_role_display }}
           </span>
         </div>
         <p style="font-size:0.825rem; color:var(--text-muted); margin-top:0.25rem;">
-          سیستم نرخ‌گذاری اجایل: تغییر دستی، اتصال لحظه‌ای به وب‌سرویس و حالت تماس بگیرید
+          مدیریت قیمت‌های مس، سفارشات، بلاک‌های محتوایی، رسانه‌ها و سطوح دسترسی پرسنل
         </p>
       </div>
 
       <div style="display:flex; gap:0.6rem; align-items:center; flex-wrap:wrap;">
+        <a href="{% url 'market:gallery' %}" class="btn btn-secondary btn-sm" target="_blank">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+          <span>مشاهده گالری سایت</span>
+        </a>
+
         {% if user.is_admin_role %}
-          <a href="{% url 'accounts:user_management' %}" class="btn btn-secondary btn-sm">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-            <span>مدیریت کاربران و پرمیشن‌ها</span>
-          </a>
           <a href="/admin/" class="btn btn-secondary btn-sm" target="_blank">
-            <span>ادمین پیشرفته</span>
+            <span>ادمین پیشرفته جنگو</span>
           </a>
         {% endif %}
 
-        {% if user.can_manage_news %}
+        {% if user.can_manage_news or user.is_content_role or user.is_admin_role %}
           <a href="{% url 'news:article_create' %}" class="btn btn-secondary btn-sm" style="border-color:var(--copper-primary); color:var(--copper-primary);">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            <span>+ انتشار خبر بورس</span>
+            <span>+ انتشار خبر</span>
           </a>
         {% endif %}
       </div>
     </div>
 
     <!-- Live Market Benchmarks Banner (وب‌سرویس و متال بولتن) -->
-    <div class="benchmark-banner">
+    <div class="benchmark-banner" style="margin-bottom:1.5rem;">
       <div class="benchmark-items">
         <div class="benchmark-col">
           <span>انس مس بورس لندن (LME)</span>
@@ -52,39 +53,61 @@
         </div>
         <div style="width:1px; height:32px; background:var(--border-strong);"></div>
         <div class="benchmark-col">
-          <span>انس آلومینیوم LME</span>
-          <strong style="direction:ltr;">$2,640 / ton</strong>
+          <span>پایه نرخ مس بازار (پلنزا)</span>
+          <strong>~۳,۴۰۰,۰۰۰ تومان</strong>
         </div>
         <div style="width:1px; height:32px; background:var(--border-strong);"></div>
         <div class="benchmark-col">
           <span>حواله دلار نیما (بانک مرکزی)</span>
           <strong>۶۲,۸۰۰ تومان</strong>
         </div>
-        <div style="width:1px; height:32px; background:var(--border-strong);"></div>
-        <div class="benchmark-col">
-          <span>شاخص پایه میلگرد بورس کالا</span>
-          <strong>۳۲,۸۰۰ تومان</strong>
-        </div>
       </div>
 
       <!-- One-click Bulk API Sync -->
-      <a href="{% url 'market:sync_api_prices' %}" class="btn btn-primary btn-sm" style="background:#16a34a; border-color:#16a34a; box-shadow:0 2px 8px rgba(22, 163, 74, 0.35);">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-        <span>⚡ بروزرسانی آنی کلیه اقلام API ({{ stats.products_api }} کالا)</span>
-      </a>
+      {% if user.has_price_perm %}
+        <a href="{% url 'market:sync_api_prices' %}" class="btn btn-primary btn-sm" style="background:#16a34a; border-color:#16a34a; box-shadow:0 2px 8px rgba(22, 163, 74, 0.35);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+          <span>⚡ بروزرسانی آنی نرخ‌های API ({{ stats.products_api }} کالا)</span>
+        </a>
+      {% endif %}
     </div>
 
-    <!-- Main Navigation Tabs -->
-    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--border-subtle); margin-bottom:1.25rem; flex-wrap:wrap; gap:0.75rem;">
-      <div style="display:flex; gap:0.5rem;">
-        <a href="?tab=pricing" class="btn btn-secondary btn-sm {% if active_tab == 'pricing' %}active{% endif %}" style="border-radius:8px 8px 0 0; border-bottom:none; font-weight:700; padding:0.6rem 1.25rem;">
+    <!-- Main Navigation Tabs (5 Clean Sections) -->
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--border-subtle); margin-bottom:1.5rem; flex-wrap:wrap; gap:0.75rem;">
+      <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+        
+        <!-- Tab 1: Pricing -->
+        <a href="?tab=pricing" class="btn btn-secondary btn-sm {% if active_tab == 'pricing' %}active{% endif %}" style="border-radius:8px 8px 0 0; border-bottom:none; font-weight:700; padding:0.6rem 1.15rem;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-          <span>میز نرخ‌گذاری متمرکز کالاها</span>
+          <span>میز نرخ‌گذاری مس ({{ stats.products_total }})</span>
         </a>
-        <a href="?tab=inquiries" class="btn btn-secondary btn-sm {% if active_tab == 'inquiries' %}active{% endif %}" style="border-radius:8px 8px 0 0; border-bottom:none; font-weight:700; padding:0.6rem 1.25rem;">
+
+        <!-- Tab 2: Inquiries -->
+        <a href="?tab=inquiries" class="btn btn-secondary btn-sm {% if active_tab == 'inquiries' %}active{% endif %}" style="border-radius:8px 8px 0 0; border-bottom:none; font-weight:700; padding:0.6rem 1.15rem;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-          <span>کارتابل سفارشات و پیش‌فاکتورها ({% if stats.inquiries_pending %}<strong style="color:var(--warning-color);">{{ stats.inquiries_pending }} در انتظار</strong>{% else %}۰{% endif %})</span>
+          <span>سفارشات و پیش‌فاکتورها ({% if stats.inquiries_pending %}<strong style="color:var(--warning-color);">{{ stats.inquiries_pending }} در انتظار</strong>{% else %}۰{% endif %})</span>
         </a>
+
+        <!-- Tab 3: CMS Content Blocks -->
+        <a href="?tab=content_blocks" class="btn btn-secondary btn-sm {% if active_tab == 'content_blocks' %}active{% endif %}" style="border-radius:8px 8px 0 0; border-bottom:none; font-weight:700; padding:0.6rem 1.15rem;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+          <span>مدیریت محتوای سایت (CMS) ({{ stats.blocks_total }})</span>
+        </a>
+
+        <!-- Tab 4: Media Gallery Assets -->
+        <a href="?tab=media_gallery" class="btn btn-secondary btn-sm {% if active_tab == 'media_gallery' %}active{% endif %}" style="border-radius:8px 8px 0 0; border-bottom:none; font-weight:700; padding:0.6rem 1.15rem;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+          <span>گالری عکس و فیلم ({{ stats.media_total }})</span>
+        </a>
+
+        <!-- Tab 5: Staff & Permissions -->
+        {% if user.has_user_perm %}
+          <a href="?tab=staff_perms" class="btn btn-secondary btn-sm {% if active_tab == 'staff_perms' %}active{% endif %}" style="border-radius:8px 8px 0 0; border-bottom:none; font-weight:700; padding:0.6rem 1.15rem;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            <span>پرسنل و دسترسی‌ها ({{ stats.staff_total }})</span>
+          </a>
+        {% endif %}
+
       </div>
 
       {% if active_tab == 'pricing' %}
@@ -95,7 +118,10 @@
       {% endif %}
     </div>
 
-    <!-- ================= TAB 1: AGILE PRICING BOARD ================= -->
+
+    <!-- ========================================================
+         TAB 1: AGILE PRICING BOARD (میز نرخ‌گذاری مس)
+         ======================================================== -->
     {% if active_tab == 'pricing' %}
       
       <!-- Filter Mode Chips -->
@@ -132,8 +158,7 @@
                 <!-- Col 2: Segmented Control (One-Click Instant Mode Switcher) -->
                 <td>
                   <div class="pricing-segmented-control" data-prod-id="{{ prod.id }}">
-                    
-                    <!-- 1. MANUAL BUTTON -->
+                    <!-- MANUAL BUTTON -->
                     <button type="button" 
                             class="pricing-segmented-btn btn-mode-switch {% if prod.pricing_mode == 'manual' %}active-manual{% endif %}" 
                             data-mode="manual" 
@@ -142,35 +167,34 @@
                       🔵 دستی
                     </button>
 
-                    <!-- 2. AUTO API BUTTON -->
+                    <!-- AUTO API BUTTON -->
                     <button type="button" 
                             class="pricing-segmented-btn btn-mode-switch {% if prod.pricing_mode == 'api' %}active-api{% endif %}" 
                             data-mode="api" 
                             data-prod-id="{{ prod.id }}"
-                            title="محاسبه خودکار بر مبنای وب‌سرویس بورس/LME و دلار نیما">
-                      🟢 خودکار API
+                            title="محاسبه خودکار بر مبنای وب‌سرویس بورس/LME و پلنزا">
+                      🟢 وب‌سرویس
                     </button>
 
-                    <!-- 3. CALL FOR PRICE BUTTON -->
+                    <!-- CALL BUTTON -->
                     <button type="button" 
                             class="pricing-segmented-btn btn-mode-switch {% if prod.pricing_mode == 'call' %}active-call{% endif %}" 
                             data-mode="call" 
                             data-prod-id="{{ prod.id }}"
-                            title="حذف نرخ عددی و نمایش بج 'تماس بگیرید'">
-                      🟡 تماس بگیرید
+                            title="نمایش عبارت تماس بگیرید روی سایت">
+                      🟡 تماس
                     </button>
-
                   </div>
                 </td>
 
-                <!-- Col 3: Live Price Display in Table -->
+                <!-- Col 3: Current Live Price -->
                 <td>
-                  <div id="price-status-{{ prod.id }}">
-                    {% if prod.pricing_mode == 'call' or prod.price == 0 %}
-                      <span class="badge-change neutral" style="background:var(--warning-bg); color:var(--warning-color); font-weight:800;">
-                        📞 تماس بگیرید
+                  <div class="status-container" id="status-container-{{ prod.id }}">
+                    {% if prod.is_call_for_price %}
+                      <span class="badge-change neutral" style="color:var(--warning-color); font-weight:800; font-size:0.85rem;">
+                        تماس بگیرید
                       </span>
-                    {% elif prod.pricing_mode == 'api' %}
+                    {% elif prod.is_api_pricing %}
                       <div style="display:flex; flex-direction:column;">
                         <strong style="color:var(--copper-primary); font-size:1rem;">{{ prod.price|intcomma }} تومان</strong>
                         <span style="font-size:0.7rem; color:var(--success-color); font-weight:700;">✓ وب‌سرویس زنده بورس</span>
@@ -178,30 +202,28 @@
                     {% else %}
                       <div style="display:flex; flex-direction:column;">
                         <strong style="color:var(--text-main); font-size:1rem;">{{ prod.price|intcomma }} تومان</strong>
-                        <span style="font-size:0.7rem; color:#2563eb; font-weight:600;">نرخ دستی کارشناس</span>
+                        <span style="font-size:0.7rem; color:#3b82f6; font-weight:700;">● نرخ دستی کارشناس</span>
                       </div>
                     {% endif %}
                   </div>
                 </td>
 
-                <!-- Col 4: Agile Price Adjustment Box -->
+                <!-- Col 4: Quick Manual Price Input & Steps -->
                 <td>
-                  <div id="manual-box-{{ prod.id }}" style="display:flex; align-items:center; gap:0.4rem; {% if prod.pricing_mode == 'call' or prod.pricing_mode == 'api' %}opacity:0.4; pointer-events:none;{% endif %}">
-                    <input type="number" 
+                  <div style="display:flex; gap:0.4rem; align-items:center;">
+                    <input type="text" 
                            id="input-price-{{ prod.id }}" 
-                           class="form-input agile-price-input" 
-                           placeholder="نرخ جدید" 
-                           value="{% if prod.price > 0 %}{{ prod.price }}{% endif %}" 
+                           class="form-input input-manual-price" 
                            data-prod-id="{{ prod.id }}"
-                           style="padding:0.35rem 0.6rem; font-size:0.875rem; width:135px;" 
-                           {% if prod.pricing_mode == 'call' or prod.pricing_mode == 'api' %}disabled{% endif %}>
-
-                    <!-- Quick Save Checkmark Button -->
+                           value="{% if prod.price > 0 %}{{ prod.price|intcomma }}{% endif %}" 
+                           placeholder="قیمت به تومان"
+                           style="padding:0.35rem 0.6rem; font-size:0.875rem; font-weight:700; max-width:140px; text-align:left; direction:ltr;">
+                    
                     <button type="button" 
                             class="btn btn-secondary btn-sm btn-save-manual" 
                             data-prod-id="{{ prod.id }}"
                             style="border-color:var(--copper-primary); color:var(--copper-primary); padding:0.35rem 0.65rem;"
-                            title="ذخیره قیمت دستی (یا فشردن اینتر)">
+                            title="ذخیره قیمت دستی">
                       ✓ ثبت
                     </button>
 
@@ -231,8 +253,11 @@
         </table>
       </div>
 
-    <!-- ================= TAB 2: INQUIRIES & ORDERS PIPELINE ================= -->
-    {% else %}
+
+    <!-- ========================================================
+         TAB 2: INQUIRIES & ORDERS PIPELINE (کارتابل سفارشات)
+         ======================================================== -->
+    {% elif active_tab == 'inquiries' %}
       <div class="table-container">
         <div style="padding:0.85rem 1.25rem; background:var(--bg-surface-elevated); border-bottom:1px solid var(--border-subtle); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
           <div style="display:flex; gap:0.4rem;">
@@ -240,7 +265,7 @@
             <a href="?tab=inquiries&status=pending" class="btn btn-secondary btn-sm {% if status_filter == 'pending' %}active{% endif %}" style="color:var(--warning-color);">در انتظار بررسی ({{ stats.inquiries_pending }})</a>
             <a href="?tab=inquiries&status=quoted" class="btn btn-secondary btn-sm {% if status_filter == 'quoted' %}active{% endif %}" style="color:var(--copper-primary);">پیش‌فاکتور صادر شده ({{ stats.inquiries_quoted }})</a>
           </div>
-          <span style="font-size:0.75rem; color:var(--text-muted);">برای هر استعلام می‌توانید نرخ اعلامی را ثبت و پیش‌فاکتور را صادر فرمایید</span>
+          <span style="font-size:0.75rem; color:var(--text-muted);">برای هر استعلام می‌توانید نرخ اعلامی را ثبت و پیش‌فاکتور رسمی را صادر فرمایید</span>
         </div>
 
         <table class="price-table">
@@ -305,8 +330,390 @@
           </tbody>
         </table>
       </div>
+
+
+    <!-- ========================================================
+         TAB 3: CMS CONTENT BLOCKS (مدیریت بلاک‌های محتوایی سایت)
+         ======================================================== -->
+    {% elif active_tab == 'content_blocks' %}
+      <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:12px; padding:1.5rem; margin-bottom:1.5rem;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.25rem; flex-wrap:wrap; gap:0.75rem;">
+          <div>
+            <h3 style="font-size:1.15rem; font-weight:800; color:var(--text-main);">بلاک‌های محتوایی پویا (CMS)</h3>
+            <p style="font-size:0.825rem; color:var(--text-muted); margin-top:0.2rem;">
+              تمام متون، تیترها، زیرعنوان‌ها، بنرها و پیام‌های سایت (بجز نرخ‌ها) از این بخش قابل ویرایش هستند.
+            </p>
+          </div>
+          <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('new-block-card').scrollIntoView({behavior:'smooth'});">
+            <span>+ ایجاد بلاک جدید</span>
+          </button>
+        </div>
+
+        <div class="table-container">
+          <table class="price-table">
+            <thead>
+              <tr>
+                <th style="width:20%;">عنوان بلاک</th>
+                <th style="width:16%;">کلید در قالب (Key)</th>
+                <th style="width:14%;">موقعیت (Section)</th>
+                <th style="width:34%;">محتوا / متن فعلی</th>
+                <th style="width:8%;">وضعیت</th>
+                <th style="width:8%;">عملیات</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for block in content_blocks %}
+                <tr>
+                  <td><strong style="color:var(--text-main);">{{ block.title }}</strong></td>
+                  <td><code style="background:var(--bg-surface-elevated); color:var(--copper-primary); padding:0.2rem 0.5rem; border-radius:4px; font-size:0.8rem;">{{ block.key }}</code></td>
+                  <td><span class="badge-change neutral">{{ block.get_section_display }}</span></td>
+                  <td>
+                    <div style="font-size:0.825rem; color:var(--text-muted); line-height:1.5; max-height:60px; overflow:hidden;">
+                      {{ block.content|striptags|truncatewords:20 }}
+                    </div>
+                  </td>
+                  <td>
+                    {% if block.is_active %}
+                      <span style="color:var(--success-color); font-weight:700; font-size:0.8rem;">✓ فعال</span>
+                    {% else %}
+                      <span style="color:var(--danger-color); font-size:0.8rem;">غیرفعال</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <div style="display:flex; gap:0.3rem;">
+                      <button type="button" class="btn btn-secondary btn-sm" style="padding:0.25rem 0.5rem; font-size:0.75rem;" onclick="openEditBlockModal('{{ block.id }}', '{{ block.title|escapejs }}', '{{ block.key|escapejs }}', '{{ block.content|escapejs }}', '{{ block.section|escapejs }}', {{ block.is_active|yesno:'true,false' }});">
+                        ویرایش
+                      </button>
+                      <a href="{% url 'market:block_delete' block.id %}" class="btn btn-secondary btn-sm" style="color:var(--danger-color); padding:0.25rem 0.5rem; font-size:0.75rem;" onclick="return confirm('آیا از حذف این بلاک اطمینان دارید؟');">
+                        حذف
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="6" style="text-align:center; padding:2rem;">هیچ بلاک محتوایی ثبت نشده است.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Quick Add New Block Card -->
+      <div id="new-block-card" style="background:var(--bg-surface-elevated); border:1px solid var(--border-subtle); border-radius:12px; padding:1.5rem;">
+        <h3 style="font-size:1.1rem; font-weight:800; color:var(--text-main); margin-bottom:1rem;">
+          + افزودن یا ایجاد بلاک محتوایی جدید
+        </h3>
+        <form action="{% url 'market:block_create' %}" method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:1rem; margin-bottom:1rem;">
+            <div>
+              <label class="form-label">عنوان بلاک (شناسایی در پنل):</label>
+              {{ block_form.title }}
+            </div>
+            <div>
+              <label class="form-label">شناسه یکتا در قالب (Key):</label>
+              {{ block_form.key }}
+            </div>
+            <div>
+              <label class="form-label">موقعیت در سایت:</label>
+              {{ block_form.section }}
+            </div>
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label class="form-label">محتوای متنی / پیام (پشتیبانی از تگ‌های متنی):</label>
+            {{ block_form.content }}
+          </div>
+          <div style="display:flex; justify-content:flex-end;">
+            <button type="submit" class="btn btn-primary">
+              <span>ذخیره و انتشار بلاک جدید</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+
+    <!-- ========================================================
+         TAB 4: MEDIA GALLERY ASSETS (گالری چندرسانه‌ای و فایل‌ها)
+         ======================================================== -->
+    {% elif active_tab == 'media_gallery' %}
+      <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:12px; padding:1.5rem; margin-bottom:1.5rem;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; flex-wrap:wrap; gap:0.75rem;">
+          <div>
+            <h3 style="font-size:1.15rem; font-weight:800; color:var(--text-main);">گالری چندرسانه‌ای (عکس، فیلم، اسناد متالورژی)</h3>
+            <p style="font-size:0.825rem; color:var(--text-muted); margin-top:0.2rem;">
+              بارگذاری و مدیریت تصاویر محصولات کارخانجات، خطوط تولید و گواهینامه‌های آزمون آزمایشگاه
+            </p>
+          </div>
+          <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('upload-media-card').scrollIntoView({behavior:'smooth'});">
+            <span>+ بارگذاری رسانه جدید</span>
+          </button>
+        </div>
+
+        <!-- Grid of Media Assets -->
+        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:1.25rem;">
+          {% for asset in media_assets %}
+            <div style="background:var(--bg-surface-elevated); border:1px solid var(--border-subtle); border-radius:10px; overflow:hidden; display:flex; flex-direction:column;">
+              <div style="position:relative; width:100%; height:140px; background:var(--bg-body); display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                {% if asset.file and asset.is_image %}
+                  <img src="{{ asset.file.url }}" alt="{{ asset.title }}" style="width:100%; height:100%; object-fit:cover;">
+                {% elif asset.thumbnail %}
+                  <img src="{{ asset.thumbnail.url }}" alt="{{ asset.title }}" style="width:100%; height:100%; object-fit:cover;">
+                {% else %}
+                  <div style="color:var(--copper-primary); text-align:center;">
+                    {% if asset.is_video %}
+                      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                    {% elif asset.is_document %}
+                      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line></svg>
+                    {% else %}
+                      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle></svg>
+                    {% endif %}
+                  </div>
+                {% endif %}
+                <div style="position:absolute; top:6px; right:6px; background:rgba(0,0,0,0.7); color:#fff; font-size:0.68rem; font-weight:700; padding:0.15rem 0.45rem; border-radius:4px;">
+                  {{ asset.get_media_type_display }}
+                </div>
+              </div>
+
+              <div style="padding:0.85rem; flex:1; display:flex; flex-direction:column;">
+                <h4 style="font-size:0.875rem; font-weight:800; color:var(--text-main); margin-bottom:0.35rem; line-height:1.4;">
+                  {{ asset.title }}
+                </h4>
+                <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:0.5rem; flex:1;">
+                  {{ asset.category_tag|default:"تولیدات مس" }}
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border-subtle); padding-top:0.5rem;">
+                  {% if asset.file %}
+                    <a href="{{ asset.file.url }}" target="_blank" style="font-size:0.725rem; color:var(--copper-primary); font-weight:700;">
+                      مشاهده فایل ←
+                    </a>
+                  {% elif asset.external_url %}
+                    <a href="{{ asset.external_url }}" target="_blank" style="font-size:0.725rem; color:var(--copper-primary); font-weight:700;">
+                      لینک خارجی ←
+                    </a>
+                  {% else %}
+                    <span></span>
+                  {% endif %}
+                  <a href="{% url 'market:media_delete' asset.id %}" style="font-size:0.725rem; color:var(--danger-color);" onclick="return confirm('آیا از حذف این رسانه مطمئن هستید؟');">
+                    حذف
+                  </a>
+                </div>
+              </div>
+            </div>
+          {% empty %}
+            <p style="grid-column:1/-1; color:var(--text-muted); text-align:center; padding:2rem;">رسانه‌ای در گالری موجود نیست.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Quick Upload Media Form Card -->
+      <div id="upload-media-card" style="background:var(--bg-surface-elevated); border:1px solid var(--border-subtle); border-radius:12px; padding:1.5rem;">
+        <h3 style="font-size:1.1rem; font-weight:800; color:var(--text-main); margin-bottom:1rem;">
+          + بارگذاری تصویر، ویدیو یا سند متالورژی جدید
+        </h3>
+        <form action="{% url 'market:media_create' %}" method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:1rem; margin-bottom:1rem;">
+            <div>
+              <label class="form-label">عنوان فایل / رسانه:</label>
+              {{ media_form.title }}
+            </div>
+            <div>
+              <label class="form-label">نوع رسانه:</label>
+              {{ media_form.media_type }}
+            </div>
+            <div>
+              <label class="form-label">دسته‌بندی (کارخانه / آزمایشگاه):</label>
+              {{ media_form.category_tag }}
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:1rem; margin-bottom:1rem;">
+            <div>
+              <label class="form-label">انتخاب فایل از کامپیوتر:</label>
+              {{ media_form.file }}
+            </div>
+            <div>
+              <label class="form-label">کاور / بندانگشتی (اختیاری برای ویدیو):</label>
+              {{ media_form.thumbnail }}
+            </div>
+            <div>
+              <label class="form-label">لینک مستقیم ویدیو یا آپارات (اختیاری):</label>
+              {{ media_form.external_url }}
+            </div>
+          </div>
+
+          <div style="margin-bottom:1rem;">
+            <label class="form-label">زیرنویس / توضیحات فنی:</label>
+            {{ media_form.caption }}
+          </div>
+
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <div style="display:flex; gap:1.25rem; align-items:center;">
+              <label style="display:flex; align-items:center; gap:0.4rem; font-size:0.85rem; cursor:pointer;">
+                {{ media_form.is_featured }}
+                <span>نمایش در ویترین صفحه اصلی</span>
+              </label>
+              <label style="display:flex; align-items:center; gap:0.4rem; font-size:0.85rem; cursor:pointer;">
+                {{ media_form.is_active }}
+                <span>فعال و در دسترس</span>
+              </label>
+            </div>
+            <button type="submit" class="btn btn-primary">
+              <span>بارگذاری و ثبت در گالری</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+
+    <!-- ========================================================
+         TAB 5: STAFF & PERMISSIONS (پرسنل و سطوح دسترسی RBAC)
+         ======================================================== -->
+    {% elif active_tab == 'staff_perms' %}
+      <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:12px; padding:1.5rem;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.25rem; flex-wrap:wrap; gap:0.75rem;">
+          <div>
+            <h3 style="font-size:1.15rem; font-weight:800; color:var(--text-main);">کنترل سطوح دسترسی پرسنل (RBAC)</h3>
+            <p style="font-size:0.825rem; color:var(--text-muted); margin-top:0.2rem;">
+              تعیین و تفکیک دقیق وظایف همکاران: دسترسی به نرخ‌گذاری مس، تغییر محتوای سایت، گالری فایل‌ها و سفارشات
+            </p>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="price-table">
+            <thead>
+              <tr>
+                <th style="width:20%;">کاربر و اطلاعات تماس</th>
+                <th style="width:15%;">نقش سازمانی</th>
+                <th style="width:12%;">تغییر قیمت‌ها</th>
+                <th style="width:12%;">ویرایش محتوا</th>
+                <th style="width:12%;">مدیریت گالری</th>
+                <th style="width:12%;">کارتابل سفارشات</th>
+                <th style="width:8%;">وضعیت</th>
+                <th style="width:9%;">اقدام</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for staff in staff_users %}
+                <tr>
+                  <form action="{% url 'market:staff_permission_save' staff.id %}" method="post">
+                    {% csrf_token %}
+                    <td>
+                      <strong style="color:var(--text-main); font-size:0.925rem;">
+                        {{ staff.get_full_name|default:staff.username }}
+                      </strong>
+                      <div style="font-size:0.775rem; color:var(--text-muted);" dir="ltr">
+                        @{{ staff.username }} {% if staff.phone_number %}• {{ staff.phone_number }}{% endif %}
+                      </div>
+                    </td>
+
+                    <td>
+                      <select name="role" class="form-select" style="padding:0.3rem 0.5rem; font-size:0.8rem;">
+                        <option value="admin" {% if staff.role == 'admin' %}selected{% endif %}>مدیر ارشد</option>
+                        <option value="sales" {% if staff.role == 'sales' %}selected{% endif %}>کارشناس فروش</option>
+                        <option value="content" {% if staff.role == 'content' %}selected{% endif %}>کارشناس محتوا</option>
+                        <option value="customer" {% if staff.role == 'customer' %}selected{% endif %}>کاربر عادی</option>
+                      </select>
+                    </td>
+
+                    <td style="text-align:center;">
+                      <input type="checkbox" name="can_manage_prices" class="form-checkbox" {% if staff.can_manage_prices or staff.is_admin_role %}checked{% endif %}>
+                    </td>
+
+                    <td style="text-align:center;">
+                      <input type="checkbox" name="can_manage_content" class="form-checkbox" {% if staff.can_manage_content or staff.is_admin_role %}checked{% endif %}>
+                    </td>
+
+                    <td style="text-align:center;">
+                      <input type="checkbox" name="can_manage_media" class="form-checkbox" {% if staff.can_manage_media or staff.is_admin_role %}checked{% endif %}>
+                    </td>
+
+                    <td style="text-align:center;">
+                      <input type="checkbox" name="can_view_inquiries" class="form-checkbox" {% if staff.can_view_inquiries or staff.is_admin_role %}checked{% endif %}>
+                    </td>
+
+                    <td style="text-align:center;">
+                      <input type="checkbox" name="is_active" class="form-checkbox" {% if staff.is_active %}checked{% endif %}>
+                    </td>
+
+                    <td>
+                      <button type="submit" class="btn btn-secondary btn-sm" style="border-color:var(--copper-primary); color:var(--copper-primary); padding:0.3rem 0.6rem; font-size:0.75rem;">
+                        ذخیره
+                      </button>
+                    </td>
+                  </form>
+                </tr>
+              {% empty %}
+                <tr><td colspan="8" style="text-align:center; padding:2rem;">کاربر ادمینی موجود نیست.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
     {% endif %}
 
   </div>
 </section>
+
+<!-- Modal for Inline Editing CMS Blocks -->
+<div id="edit-block-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.65); z-index:200; align-items:center; justify-content:center; padding:1.5rem;">
+  <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:14px; max-width:600px; width:100%; padding:2rem; box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+      <h3 style="font-size:1.2rem; font-weight:800; color:var(--text-main);">ویرایش سریع بلاک محتوایی</h3>
+      <button type="button" onclick="closeEditBlockModal();" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1.5rem;">&times;</button>
+    </div>
+    <form id="edit-block-form" method="post" action="">
+      {% csrf_token %}
+      <div style="margin-bottom:1rem;">
+        <label class="form-label">عنوان بلاک:</label>
+        <input type="text" id="modal-block-title" name="title" class="form-input" required>
+      </div>
+      <div style="margin-bottom:1rem;">
+        <label class="form-label">کلید یکتا (Key):</label>
+        <input type="text" id="modal-block-key" name="key" class="form-input" required>
+      </div>
+      <div style="margin-bottom:1rem;">
+        <label class="form-label">موقعیت در سایت:</label>
+        <select id="modal-block-section" name="section" class="form-select">
+          {% for val, label in section_choices %}
+            <option value="{{ val }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div style="margin-bottom:1rem;">
+        <label class="form-label">متن و محتوای بلاک:</label>
+        <textarea id="modal-block-content" name="content" class="form-input" rows="5"></textarea>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <label style="display:flex; align-items:center; gap:0.4rem; font-size:0.85rem; cursor:pointer;">
+          <input type="checkbox" id="modal-block-active" name="is_active">
+          <span>فعال و در حال نمایش</span>
+        </label>
+        <div style="display:flex; gap:0.5rem;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="closeEditBlockModal();">انصراف</button>
+          <button type="submit" class="btn btn-primary btn-sm">ذخیره تغییرات</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openEditBlockModal(id, title, key, content, section, isActive) {
+    const modal = document.getElementById('edit-block-modal');
+    const form = document.getElementById('edit-block-form');
+    form.action = '/management/blocks/' + id + '/save/';
+    document.getElementById('modal-block-title').value = title;
+    document.getElementById('modal-block-key').value = key;
+    document.getElementById('modal-block-content').value = content;
+    document.getElementById('modal-block-section').value = section;
+    document.getElementById('modal-block-active').checked = isActive;
+    modal.style.display = 'flex';
+  }
+
+  function closeEditBlockModal() {
+    document.getElementById('edit-block-modal').style.display = 'none';
+  }
+</script>
 {% endblock %}

@@ -212,3 +212,82 @@ class OrderInquiry(models.Model):
 
     def __str__(self):
         return f"{self.tracking_code} - {self.customer_name} ({self.get_status_display()})"
+
+
+class SiteContentBlock(models.Model):
+    """
+    Dynamic CMS Content Blocks for any text/banner/block on the website.
+    Can be edited by content managers and admins via management panel.
+    """
+    class Section(models.TextChoices):
+        HERO = 'hero', 'بخش شاخص بالای صفحه (Hero)'
+        BANNER = 'banner', 'بنرهای تبلیغاتی و اطلاعیه‌ها'
+        ABOUT = 'about', 'درباره ما و معرفی مجموعه'
+        WHY_US = 'why_us', 'مزایای رقابتی و خدمات'
+        SERVICES = 'services', 'خدمات متالورژی و برشکاری'
+        FOOTER = 'footer', 'فوتر و اطلاعات تماس'
+        GENERAL = 'general', 'عمومی / سایر بخش‌ها'
+
+    key = models.SlugField(max_length=80, unique=True, allow_unicode=True, verbose_name="شناسه یکتای بلاک (جهت استفاده در قالب)")
+    title = models.CharField(max_length=200, verbose_name="عنوان بلاک")
+    subtitle = models.CharField(max_length=250, blank=True, verbose_name="زیرعنوان / برچسب کوتاه")
+    content = models.TextField(blank=True, verbose_name="متن / محتوای بلاک (پشتیبانی از HTML)")
+    image = models.ImageField(upload_to='blocks/%Y/%m/', blank=True, null=True, verbose_name="تصویر شاخص بلاک")
+    link_url = models.CharField(max_length=255, blank=True, verbose_name="لینک کلیک / دکمه")
+    link_text = models.CharField(max_length=80, blank=True, verbose_name="متن روی دکمه")
+    section = models.CharField(max_length=30, choices=Section.choices, default=Section.GENERAL, verbose_name="بخش مرتبط در سایت")
+    order = models.PositiveIntegerField(default=0, verbose_name="ترتیب نمایش")
+    is_active = models.BooleanField(default=True, verbose_name="فعال / در حال نمایش")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="تاریخ آخرین بروزرسانی")
+
+    class Meta:
+        verbose_name = "بلاک محتوایی سایت (CMS)"
+        verbose_name_plural = "بلاک‌های محتوایی سایت (CMS)"
+        ordering = ['section', 'order', 'title']
+
+    def __str__(self):
+        return f"[{self.get_section_display()}] {self.title} ({self.key})"
+
+
+class MediaAsset(models.Model):
+    """
+    Media Gallery for images, videos, and catalogs/analysis certificates.
+    Managed from the administration panel.
+    """
+    class MediaType(models.TextChoices):
+        IMAGE = 'image', 'تصویر / عکس'
+        VIDEO = 'video', 'ویدیو / فیلم'
+        DOCUMENT = 'document', 'کاتالوگ / سند فنی / برگه آنالیز PDF'
+
+    title = models.CharField(max_length=200, verbose_name="عنوان رسانه")
+    media_type = models.CharField(max_length=20, choices=MediaType.choices, default=MediaType.IMAGE, verbose_name="نوع رسانه")
+    file = models.FileField(upload_to='gallery/%Y/%m/', blank=True, null=True, verbose_name="فایل رسانه (تصویر، ویدیو MP4، فایل PDF)")
+    thumbnail = models.ImageField(upload_to='gallery/thumbs/%Y/%m/', blank=True, null=True, verbose_name="تصویر کاور / بندانگشتی")
+    external_url = models.URLField(blank=True, verbose_name="لینک مستقیم بیرونی یا پخش ویدیو (اختیاری)")
+    caption = models.TextField(blank=True, verbose_name="توضیحات کوتاه / زیرنویس فنی")
+    category_tag = models.CharField(max_length=100, default="تولیدات مس", verbose_name="دسته‌بندی (مثال: کارخانه دنیای مس، باسبار باهنر، آزمایشگاه)")
+    is_featured = models.BooleanField(default=False, verbose_name="نمایش در ویترین صفحه نخست")
+    is_active = models.BooleanField(default=True, verbose_name="فعال / در دسترس")
+    order = models.PositiveIntegerField(default=0, verbose_name="ترتیب نمایش")
+    uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="کاربر بارگذاریکننده")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ بارگذاری")
+
+    class Meta:
+        verbose_name = "رسانه گالری"
+        verbose_name_plural = "گالری رسانه‌ها (عکس، فیلم، اسناد)"
+        ordering = ['order', '-created_at']
+
+    def __str__(self):
+        return f"{self.title} ({self.get_media_type_display()})"
+
+    @property
+    def is_video(self):
+        return self.media_type == self.MediaType.VIDEO
+
+    @property
+    def is_image(self):
+        return self.media_type == self.MediaType.IMAGE
+
+    @property
+    def is_document(self):
+        return self.media_type == self.MediaType.DOCUMENT
