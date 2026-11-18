@@ -50,40 +50,31 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // 1.1 MOBILE NAVIGATION DRAWER & ACCORDION
-  const mobileToggleBtn = document.getElementById('mobile-menu-toggle');
-  const mobileDrawer = document.getElementById('mobile-nav-drawer');
-  const mobileBackdrop = document.getElementById('mobile-nav-backdrop');
-  const mobileCloseBtn = document.getElementById('mobile-nav-close');
-  const mobileCopperToggle = document.getElementById('mobile-copper-toggle');
-  const mobileCopperMenu = document.getElementById('mobile-copper-menu');
+  // 1.1 FADE & FLAT DROPDOWN TOGGLE (Mobile, Tablet & Desktop Touch)
+  const navDropdowns = document.querySelectorAll('.nav-dropdown');
 
-  function openMobileNav() {
-    if (mobileDrawer) mobileDrawer.classList.add('is-open');
-    if (mobileBackdrop) mobileBackdrop.classList.add('is-open');
-    document.body.style.overflow = 'hidden';
-  }
+  navDropdowns.forEach(dropdown => {
+    const trigger = dropdown.querySelector('.nav-dropdown-trigger');
+    if (trigger) {
+      trigger.addEventListener('click', function (e) {
+        if (window.innerWidth <= 992 || ('ontouchstart' in window)) {
+          e.preventDefault();
+          const isActive = dropdown.classList.contains('is-active');
+          navDropdowns.forEach(d => d.classList.remove('is-active'));
+          if (!isActive) {
+            dropdown.classList.add('is-active');
+          }
+        }
+      });
+    }
+  });
 
-  function closeMobileNav() {
-    if (mobileDrawer) mobileDrawer.classList.remove('is-open');
-    if (mobileBackdrop) mobileBackdrop.classList.remove('is-open');
-    document.body.style.overflow = '';
-  }
-
-  if (mobileToggleBtn) mobileToggleBtn.addEventListener('click', openMobileNav);
-  if (mobileCloseBtn) mobileCloseBtn.addEventListener('click', closeMobileNav);
-  if (mobileBackdrop) mobileBackdrop.addEventListener('click', closeMobileNav);
-
-  if (mobileCopperToggle && mobileCopperMenu) {
-    mobileCopperToggle.addEventListener('click', function () {
-      const isHidden = mobileCopperMenu.style.display === 'none';
-      mobileCopperMenu.style.display = isHidden ? 'flex' : 'none';
-      const chevron = mobileCopperToggle.querySelector('.accordion-chevron');
-      if (chevron) {
-        chevron.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
-      }
-    });
-  }
+  // Close dropdown on click outside
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('.nav-dropdown')) {
+      navDropdowns.forEach(d => d.classList.remove('is-active'));
+    }
+  });
 
   // 2. METAL CATEGORY TABS SWITCHER (Homepage)
   const tabButtons = document.querySelectorAll('.metal-tab-btn');
@@ -118,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Metal Densities (g/cm³) and estimated reference prices (Toman/kg)
   const metalProps = {
-    copper: { density: 8.96, price: 642000, name: 'مس' },
+    copper: { density: 8.96, price: 668500, name: 'مس' },
     aluminum: { density: 2.70, price: 238000, name: 'آلومینیوم' },
     steel: { density: 7.85, price: 32400, name: 'فولاد و آهن' },
     brass: { density: 8.50, price: 520000, name: 'برنج' },

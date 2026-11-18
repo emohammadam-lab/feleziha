@@ -226,18 +226,10 @@
           <!-- Guest: Login / Register -->
           <a href="{% url 'accounts:login' %}" class="btn btn-secondary btn-sm">ورود / ثبت‌نام</a>
         {% endif %}
-
-        <!-- Mobile Hamburger Button -->
-        <button id="mobile-menu-toggle" class="btn-mobile-toggle" aria-label="منوی سایت" title="منوی سایت">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
-        </button>
       </div>
 
     </div>
+  </header>
   </header>
 
     </div>
@@ -339,61 +331,6 @@
       </div>
     </div>
   </footer>
-
-  <!-- Mobile Navigation Drawer -->
-  <div id="mobile-nav-backdrop" class="mobile-nav-backdrop"></div>
-  <aside id="mobile-nav-drawer" class="mobile-nav-drawer">
-    <div class="mobile-nav-header">
-      <div class="brand-wrapper">
-        <img src="{% static 'images/logo-header-day.png' %}" alt="{{ brand_name }}" class="brand-logo-img logo-day" style="height:36px;">
-        <img src="{% static 'images/logo-header-night.png' %}" alt="{{ brand_name }}" class="brand-logo-img logo-night" style="height:36px;">
-      </div>
-      <button id="mobile-nav-close" class="mobile-nav-close-btn" aria-label="بستن منو">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-      </button>
-    </div>
-    <div class="mobile-nav-body">
-      <ul class="mobile-nav-links">
-        <li><a href="{% url 'market:home' %}" class="mobile-nav-item">صفحه اصلی</a></li>
-        
-        <!-- Mobile Accordion for Copper -->
-        <li class="mobile-nav-accordion">
-          <button class="mobile-nav-accordion-btn" id="mobile-copper-toggle">
-            <span style="display:inline-flex; align-items:center; gap:0.4rem;">
-              <span class="nav-dot-copper"></span>
-              <span>بازار تخصصی مس</span>
-            </span>
-            <svg class="accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
-          </button>
-          <div class="mobile-nav-subitems" id="mobile-copper-menu" style="display:none;">
-            {% for cat in nav_categories %}
-              {% for sub in cat.subcategories.all %}
-                <a href="{% url 'market:subcategory_products' sub.slug %}" class="mobile-sub-link">
-                  <span>• {{ sub.name }}</span>
-                </a>
-              {% endfor %}
-            {% endfor %}
-            <a href="{% url 'market:product_list' %}" class="mobile-sub-link highlight">
-              <span>مشاهده همه مقاطع مس ←</span>
-            </a>
-          </div>
-        </li>
-
-        <li><a href="{% url 'market:home' %}#calculator-section" class="mobile-nav-item">محاسبه‌گر وزن فلزات</a></li>
-        <li><a href="{% url 'news:news_list' %}" class="mobile-nav-item">اخبار و تحلیل بورس</a></li>
-        <li><a href="{% url 'market:inquiry_create' %}" class="mobile-nav-item">پیگیری استعلام</a></li>
-      </ul>
-      <div class="mobile-nav-footer">
-        <a href="{% url 'market:inquiry_create' %}" class="btn btn-primary" style="width:100%; justify-content:center;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-          <span>درخواست پیش‌فاکتور رسمی</span>
-        </a>
-        <div style="margin-top:1rem; font-size:0.8rem; color:var(--text-muted); text-align:center;">
-          تلفن بازرگانی: <strong style="color:var(--text-main); direction:ltr; display:inline-block;">{{ support_phone }}</strong>
-        </div>
-      </div>
-    </div>
-  </aside>
 
   <!-- Toast Notifications Container -->
   <div id="toast-container" class="toast-container"></div>
