@@ -50,6 +50,41 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  // 1.1 MOBILE NAVIGATION DRAWER & ACCORDION
+  const mobileToggleBtn = document.getElementById('mobile-menu-toggle');
+  const mobileDrawer = document.getElementById('mobile-nav-drawer');
+  const mobileBackdrop = document.getElementById('mobile-nav-backdrop');
+  const mobileCloseBtn = document.getElementById('mobile-nav-close');
+  const mobileCopperToggle = document.getElementById('mobile-copper-toggle');
+  const mobileCopperMenu = document.getElementById('mobile-copper-menu');
+
+  function openMobileNav() {
+    if (mobileDrawer) mobileDrawer.classList.add('is-open');
+    if (mobileBackdrop) mobileBackdrop.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeMobileNav() {
+    if (mobileDrawer) mobileDrawer.classList.remove('is-open');
+    if (mobileBackdrop) mobileBackdrop.classList.remove('is-open');
+    document.body.style.overflow = '';
+  }
+
+  if (mobileToggleBtn) mobileToggleBtn.addEventListener('click', openMobileNav);
+  if (mobileCloseBtn) mobileCloseBtn.addEventListener('click', closeMobileNav);
+  if (mobileBackdrop) mobileBackdrop.addEventListener('click', closeMobileNav);
+
+  if (mobileCopperToggle && mobileCopperMenu) {
+    mobileCopperToggle.addEventListener('click', function () {
+      const isHidden = mobileCopperMenu.style.display === 'none';
+      mobileCopperMenu.style.display = isHidden ? 'flex' : 'none';
+      const chevron = mobileCopperToggle.querySelector('.accordion-chevron');
+      if (chevron) {
+        chevron.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+      }
+    });
+  }
+
   // 2. METAL CATEGORY TABS SWITCHER (Homepage)
   const tabButtons = document.querySelectorAll('.metal-tab-btn');
   const tabPanes = document.querySelectorAll('.metal-tab-pane');

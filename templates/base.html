@@ -86,7 +86,7 @@
       </a>
 
       <!-- Main Navigation (Focused on Copper & Its Specialized Products) -->
-      <nav>
+      <nav class="nav-main">
         <ul class="nav-links">
           <li>
             <a href="{% url 'market:home' %}" class="nav-link">صفحه اصلی</a>
@@ -94,36 +94,79 @@
 
           <!-- Copper Products Dropdown Menu -->
           <li class="nav-dropdown">
-            <a href="{% url 'market:product_list' %}" class="nav-link nav-dropdown-trigger">
-              <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--copper-primary);"></span>
+            <a href="{% url 'market:product_list' %}" class="nav-link nav-dropdown-trigger" id="copper-nav-btn">
+              <span class="nav-dot-copper"></span>
               <span>بازار تخصصی مس</span>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              <svg class="nav-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
             </a>
 
-            <!-- Dropdown Menu Content -->
-            <div class="nav-dropdown-menu" style="min-width:320px;">
-              {% for cat in nav_categories %}
-                <div class="nav-dropdown-category" style="width:100%;">
-                  <div class="nav-dropdown-cat-title" style="color:var(--copper-primary); font-size:0.9rem; font-weight:800; border-bottom:1px solid var(--border-subtle); padding-bottom:0.4rem; margin-bottom:0.6rem;">
-                    <span>مقاطع و فرآورده‌های مس استاندارد</span>
+            <!-- Professional Mega Dropdown Menu -->
+            <div class="nav-dropdown-menu">
+              <!-- Dropdown Header Bar -->
+              <div class="nav-dropdown-header">
+                <div class="nav-dropdown-header-info">
+                  <div class="nav-dropdown-header-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M8 12h8"></path><path d="M12 8v8"></path></svg>
                   </div>
-                  <ul class="nav-dropdown-sublinks" style="display:grid; grid-template-columns:1fr; gap:0.4rem;">
-                    {% for sub in cat.subcategories.all %}
-                      <li>
-                        <a href="{% url 'market:subcategory_products' sub.slug %}" class="nav-dropdown-sublink" style="padding:0.4rem 0.6rem; border-radius:6px; font-weight:600;">
-                          <span style="color:var(--copper-primary); font-weight:bold;">›</span>
-                          <span>{{ sub.name }}</span>
-                        </a>
-                      </li>
-                    {% endfor %}
-                  </ul>
+                  <div>
+                    <h4 class="nav-dropdown-header-title">مقاطع و فرآورده‌های تخصصی مس</h4>
+                    <p class="nav-dropdown-header-desc">تأمین مستقیم باسبار، مفتول، سیم و کاتد مس از بورس کالای ایران</p>
+                  </div>
                 </div>
-              {% endfor %}
-              
-              <div style="border-top: 1px solid var(--border-subtle); padding-top: 0.75rem; margin-top:0.5rem; display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 0.775rem; color: var(--text-muted);">تأمین مستقیم باسبار، مفتول، سیم و کاتد</span>
-                <a href="{% url 'market:product_list' %}" style="font-size: 0.8rem; font-weight: 700; color: var(--copper-primary);">
-                  مشاهده همه مقاطع مس ←
+                <a href="{% url 'market:product_list' %}" class="nav-dropdown-all-btn">
+                  <span>مشاهده کل کاتالوگ</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </a>
+              </div>
+
+              <!-- Subcategories Grid (5 Specialized Copper Subgroups) -->
+              <div class="nav-dropdown-grid">
+                {% for cat in nav_categories %}
+                  {% for sub in cat.subcategories.all %}
+                    <a href="{% url 'market:subcategory_products' sub.slug %}" class="nav-sub-card">
+                      <div class="nav-sub-card-icon">
+                        {% if sub.slug == 'copper-busbar' %}
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="4" rx="1"></rect><rect x="2" y="10" width="20" height="4" rx="1"></rect><rect x="2" y="16" width="20" height="4" rx="1"></rect></svg>
+                        {% elif sub.slug == 'copper-export-rod' %}
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 3a9 9 0 0 1 9 9"></path><circle cx="12" cy="12" r="4"></circle></svg>
+                        {% elif sub.slug == 'copper-wire-conductor' %}
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                        {% elif sub.slug == 'copper-cathode' %}
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+                        {% else %}
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="4"></circle></svg>
+                        {% endif %}
+                      </div>
+                      <div class="nav-sub-card-content">
+                        <div class="nav-sub-card-title">{{ sub.name }}</div>
+                        <div class="nav-sub-card-desc">
+                          {% if sub.slug == 'copper-busbar' %}
+                            شین الکتریکال تابلویی Cu-ETP ۹۹.۹۵٪
+                          {% elif sub.slug == 'copper-export-rod' %}
+                            مفتول ۸mm صادراتی ASTM B49 و راد CCR
+                          {% elif sub.slug == 'copper-wire-conductor' %}
+                            سیم لخت ارت هوایی و هادی افشان منعطف
+                          {% elif sub.slug == 'copper-cathode' %}
+                            کاتد سرچشمه فملی و بابک مس ایرانیان
+                          {% else %}
+                            لوله مسی کلاف برودتی و ورق باهنر
+                          {% endif %}
+                        </div>
+                      </div>
+                      <span class="nav-sub-card-arrow">‹</span>
+                    </a>
+                  {% endfor %}
+                {% endfor %}
+              </div>
+
+              <!-- Dropdown Footer -->
+              <div class="nav-dropdown-footer">
+                <div class="nav-dropdown-footer-badge">
+                  <span class="nav-dropdown-pulse"></span>
+                  <span>تضمین برگه آنالیز متالورژی • بارگیری فوری از انبار شورآباد و درب کارخانه</span>
+                </div>
+                <a href="{% url 'market:inquiry_create' %}" class="nav-dropdown-rfq-link">
+                  استعلام سریع پیش‌فاکتور ←
                 </a>
               </div>
             </div>
@@ -148,7 +191,7 @@
       <!-- Header Actions: CTA, Theme Toggle & User Auth -->
       <div class="header-actions">
         <!-- Prominent RFQ CTA -->
-        <a href="{% url 'market:inquiry_create' %}" class="btn btn-primary btn-sm" style="box-shadow: 0 2px 8px rgba(194, 94, 46, 0.35);">
+        <a href="{% url 'market:inquiry_create' %}" class="btn btn-primary btn-sm header-rfq-btn" style="box-shadow: 0 2px 8px rgba(194, 94, 46, 0.35);">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
           <span>استعلام پیش‌فاکتور</span>
         </a>
@@ -183,7 +226,19 @@
           <!-- Guest: Login / Register -->
           <a href="{% url 'accounts:login' %}" class="btn btn-secondary btn-sm">ورود / ثبت‌نام</a>
         {% endif %}
+
+        <!-- Mobile Hamburger Button -->
+        <button id="mobile-menu-toggle" class="btn-mobile-toggle" aria-label="منوی سایت" title="منوی سایت">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
       </div>
+
+    </div>
+  </header>
 
     </div>
   </header>
@@ -284,6 +339,61 @@
       </div>
     </div>
   </footer>
+
+  <!-- Mobile Navigation Drawer -->
+  <div id="mobile-nav-backdrop" class="mobile-nav-backdrop"></div>
+  <aside id="mobile-nav-drawer" class="mobile-nav-drawer">
+    <div class="mobile-nav-header">
+      <div class="brand-wrapper">
+        <img src="{% static 'images/logo-header-day.png' %}" alt="{{ brand_name }}" class="brand-logo-img logo-day" style="height:36px;">
+        <img src="{% static 'images/logo-header-night.png' %}" alt="{{ brand_name }}" class="brand-logo-img logo-night" style="height:36px;">
+      </div>
+      <button id="mobile-nav-close" class="mobile-nav-close-btn" aria-label="بستن منو">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    <div class="mobile-nav-body">
+      <ul class="mobile-nav-links">
+        <li><a href="{% url 'market:home' %}" class="mobile-nav-item">صفحه اصلی</a></li>
+        
+        <!-- Mobile Accordion for Copper -->
+        <li class="mobile-nav-accordion">
+          <button class="mobile-nav-accordion-btn" id="mobile-copper-toggle">
+            <span style="display:inline-flex; align-items:center; gap:0.4rem;">
+              <span class="nav-dot-copper"></span>
+              <span>بازار تخصصی مس</span>
+            </span>
+            <svg class="accordion-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="mobile-nav-subitems" id="mobile-copper-menu" style="display:none;">
+            {% for cat in nav_categories %}
+              {% for sub in cat.subcategories.all %}
+                <a href="{% url 'market:subcategory_products' sub.slug %}" class="mobile-sub-link">
+                  <span>• {{ sub.name }}</span>
+                </a>
+              {% endfor %}
+            {% endfor %}
+            <a href="{% url 'market:product_list' %}" class="mobile-sub-link highlight">
+              <span>مشاهده همه مقاطع مس ←</span>
+            </a>
+          </div>
+        </li>
+
+        <li><a href="{% url 'market:home' %}#calculator-section" class="mobile-nav-item">محاسبه‌گر وزن فلزات</a></li>
+        <li><a href="{% url 'news:news_list' %}" class="mobile-nav-item">اخبار و تحلیل بورس</a></li>
+        <li><a href="{% url 'market:inquiry_create' %}" class="mobile-nav-item">پیگیری استعلام</a></li>
+      </ul>
+      <div class="mobile-nav-footer">
+        <a href="{% url 'market:inquiry_create' %}" class="btn btn-primary" style="width:100%; justify-content:center;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+          <span>درخواست پیش‌فاکتور رسمی</span>
+        </a>
+        <div style="margin-top:1rem; font-size:0.8rem; color:var(--text-muted); text-align:center;">
+          تلفن بازرگانی: <strong style="color:var(--text-main); direction:ltr; display:inline-block;">{{ support_phone }}</strong>
+        </div>
+      </div>
+    </div>
+  </aside>
 
   <!-- Toast Notifications Container -->
   <div id="toast-container" class="toast-container"></div>
