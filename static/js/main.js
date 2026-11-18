@@ -38,13 +38,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  // Load saved theme or default to light
-  const savedTheme = localStorage.getItem('felez_theme') || 'light';
+  // Load saved theme or default to dark gray
+  const savedTheme = localStorage.getItem('felez_theme') || 'dark';
   applyTheme(savedTheme);
 
   if (themeToggleBtn) {
     themeToggleBtn.addEventListener('click', function () {
-      const current = document.documentElement.getAttribute('data-theme') || 'light';
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
       const next = current === 'dark' ? 'light' : 'dark';
       applyTheme(next);
     });
@@ -107,9 +107,9 @@ document.addEventListener('DOMContentLoaded', function () {
   const weightDisplay = document.getElementById('calc-result-weight');
   const priceDisplay = document.getElementById('calc-result-price');
 
-  // Metal Densities (g/cm³) and estimated reference prices (Toman/kg)
+  // Metal Densities (g/cm³) and estimated reference prices (Toman/kg - پایه نرخ مس ۳,۴۲۰,۰۰۰ تومان)
   const metalProps = {
-    copper: { density: 8.96, price: 668500, name: 'مس' },
+    copper: { density: 8.96, price: 3420000, name: 'مس' },
     aluminum: { density: 2.70, price: 238000, name: 'آلومینیوم' },
     steel: { density: 7.85, price: 32400, name: 'فولاد و آهن' },
     brass: { density: 8.50, price: 520000, name: 'برنج' },

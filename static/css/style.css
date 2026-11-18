@@ -45,42 +45,42 @@
 }
 
 [data-theme="dark"] {
-  /* DARK GRAY THEME (خاکستری تیره - یکم کمتر از مشکی، فلت و فوق‌العاده چشم‌نواز) */
-  --bg-body: #1e2024;
-  --bg-surface: #26282e;
-  --bg-surface-elevated: #2f323a;
-  --bg-surface-soft: #23252a;
-  --border-subtle: #383b44;
-  --border-strong: #4c505c;
+  /* VISIBLE DARK GRAY THEME (خاکستری تیره ملموس، کمی روشن‌تر از مشکی، کاملاً فلت، مدرن و باکلاس) */
+  --bg-body: #2d3036;
+  --bg-surface: #363942;
+  --bg-surface-elevated: #414550;
+  --bg-surface-soft: #31343c;
+  --border-subtle: #4c515e;
+  --border-strong: #616777;
 
-  --text-main: #f3f4f6;
-  --text-muted: #a6abb8;
-  --text-light: #7e8392;
+  --text-main: #ffffff;
+  --text-muted: #c7cbd6;
+  --text-light: #9ea3b0;
 
   /* Industrial Copper Highlights on Dark Gray */
-  --copper-primary: #ea7a3e;
-  --copper-hover: #f97316;
-  --copper-light: rgba(234, 122, 62, 0.12);
-  --copper-border: rgba(234, 122, 62, 0.28);
+  --copper-primary: #f08346;
+  --copper-hover: #fb923c;
+  --copper-light: rgba(240, 131, 70, 0.15);
+  --copper-border: rgba(240, 131, 70, 0.35);
 
-  --bronze-accent: #f59e0b;
-  --steel-accent: #a6abb8;
-  --aluminum-accent: #d1d5db;
+  --bronze-accent: #fbbf24;
+  --steel-accent: #c7cbd6;
+  --aluminum-accent: #e5e7eb;
 
   --success-color: #4ade80;
-  --success-bg: rgba(74, 222, 128, 0.12);
+  --success-bg: rgba(74, 222, 128, 0.15);
   --danger-color: #f87171;
-  --danger-bg: rgba(248, 113, 113, 0.12);
+  --danger-bg: rgba(248, 113, 113, 0.15);
   --warning-color: #fbbf24;
-  --warning-bg: rgba(251, 191, 36, 0.12);
+  --warning-bg: rgba(251, 191, 36, 0.15);
   --info-color: #38bdf8;
-  --info-bg: rgba(56, 189, 248, 0.12);
+  --info-bg: rgba(56, 189, 248, 0.15);
 
   --card-shadow: none;
   --card-shadow-hover: none;
-  --header-bg: rgba(38, 40, 46, 0.98);
-  --ticker-bg: #18191d;
-  --ticker-text: #f3f4f6;
+  --header-bg: rgba(54, 57, 66, 0.98);
+  --ticker-bg: #27292f;
+  --ticker-text: #ffffff;
 }
 
 * {

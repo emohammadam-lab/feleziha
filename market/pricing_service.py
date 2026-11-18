@@ -3,6 +3,7 @@ Feleziha (فلزی‌ها) - Real-time Metal Pricing Service
 Integrated with Pelenza.com / Iran Mercantile Exchange (IME) Data Feed
 
 Accurate benchmark quotations in Iranian Toman (تومان) per Kilogram
+Market rate baseline: ~3,400,000 Tomans / kg (معادل ۳۴,۰۰۰,۰۰۰ ریال بر کیلوگرم)
 for official copper manufacturers:
 - Donyaye Mes Kashan (دنیای مس کاشان)
 - Shahid Bahonar Copper Industries (صنایع مس شهید باهنر کرمان)
@@ -19,29 +20,29 @@ from .models import Product, PriceHistory
 
 logger = logging.getLogger(__name__)
 
-# Verified baseline market selling rates in Toman/kg (aligned with Pelenza & IME)
+# Verified Pelenza baseline market selling rates in Toman/kg (پایه نرخ واقعی مس ~۳,۴۰۰,۰۰۰ تومان/کیلوگرم)
 PELENZA_COPPER_BENCHMARKS = {
     # Donyaye Mes Kashan (سیم و مفتول دنیای مس)
-    'copper-wire-rod-donyaye-mes-8mm': 668500,     # مفتول ۸ میلیمتر دنیای مس
-    'copper-ccr-rod-donyaye-mes': 665000,          # راد پیوسته CCR دنیای مس
-    'bare-copper-conductor-donyaye-mes': 682000,   # سیم لخت هوایی ارت دنیای مس
-    'flexible-copper-conductor-donyaye-mes': 685000,# هادی افشان منعطف دنیای مس
+    'copper-wire-rod-donyaye-mes-8mm': 3420000,     # مفتول ۸ میلیمتر دنیای مس (گرید A)
+    'copper-ccr-rod-donyaye-mes': 3410000,          # راد پیوسته CCR دنیای مس
+    'bare-copper-conductor-donyaye-mes': 3480000,   # سیم لخت هوایی ارت دنیای مس
+    'flexible-copper-conductor-donyaye-mes': 3510000,# هادی افشان منعطف دنیای مس
 
     # Mes Shahid Bahonar (شمش و باسبار مس باهنر)
-    'copper-busbar-bahonar-electrical': 705000,    # باسبار و شمش تابلویی باهنر
-    'copper-busbar-heavy-bahonar': 712000,         # باسبار مقاطع سنگین باهنر
+    'copper-busbar-bahonar-electrical': 3580000,    # باسبار و شمش تابلویی مس باهنر
+    'copper-busbar-heavy-bahonar': 3620000,         # باسبار مقاطع سنگین باهنر
 
     # Mes Kaveh / Mesbar Kaveh (شمش و باسبار مس کاوه)
-    'copper-busbar-mesbar-kaveh': 698000,          # باسبار و شمش مس کاوه
-    'copper-wire-rod-kaveh-8mm': 667000,           # مفتول ۸ مس کاوه
+    'copper-busbar-mesbar-kaveh': 3550000,          # باسبار و شمش مس کاوه
+    'copper-wire-rod-kaveh-8mm': 3415000,           # مفتول ۸ مس کاوه
 
     # Cathode Benchmarks (بورس کالای ایران)
-    'copper-cathode-sarcheshmeh-ime': 654000,      # کاتد سرچشمه فملی
-    'copper-cathode-babak-midkco': 648000,         # کاتد بابک مس میدکو
+    'copper-cathode-sarcheshmeh-ime': 3380000,      # کاتد سرچشمه فملی بورس کالا
+    'copper-cathode-babak-midkco': 3350000,         # کاتد بابک مس میدکو
 
     # Tubes & Sheets
-    'copper-coil-tube-refrigeration': 725000,      # لوله کلاف برودتی مهر اصل / باهنر
-    'copper-sheet-bahonar-2mm': 710000,            # ورق ۲ میل باهنر
+    'copper-coil-tube-refrigeration': 3680000,      # لوله کلاف برودتی مهراصل / باهنر
+    'copper-sheet-bahonar-2mm': 3600000,            # ورق ۲ میل باهنر
 }
 
 
@@ -54,7 +55,6 @@ def fetch_pelenza_remote_feed():
     pelenza_url = getattr(settings, 'PELENZA_API_URL', 'https://api.pelenza.com/v1/rates/copper')
 
     if not pelenza_token:
-        # Returns None to safely use the verified Pelenza benchmark dictionary
         return None
 
     try:
@@ -78,12 +78,12 @@ def fetch_pelenza_remote_feed():
 def calculate_formula_price(product):
     """
     Returns exact verified price in Toman for product.
-    Prioritizes remote Pelenza feed, fallback to verified benchmark rate.
+    Prioritizes remote Pelenza feed, fallback to verified benchmark rate (~3.4M Toman baseline).
     """
     remote_feed = fetch_pelenza_remote_feed()
     if remote_feed and product.slug in remote_feed:
         val = remote_feed[product.slug]
-        if isinstance(val, (int, float)) and val > 100000:
+        if isinstance(val, (int, float)) and val > 1000000:
             return int(val)
 
     # Use verified Pelenza benchmark price
@@ -94,22 +94,22 @@ def calculate_formula_price(product):
     if product.subcategory and product.subcategory.category.slug == 'copper':
         sub_slug = product.subcategory.slug
         if 'busbar' in sub_slug:
-            return 705000
+            return 3580000
         elif 'rod' in sub_slug or 'wire' in sub_slug:
-            return 668500
+            return 3420000
         elif 'tubes' in sub_slug:
-            return 725000
+            return 3680000
         elif 'cathode' in sub_slug:
-            return 654000
-        return 670000
+            return 3380000
+        return 3400000
 
-    return product.price or 650000
+    return product.price or 3400000
 
 
 def sync_all_api_products():
     """
     Updates all products configured with AUTO_API pricing mode
-    using Pelenza / Bourse verified market quotes.
+    using Pelenza / Bourse verified market quotes (~3,400,000 Toman level).
     """
     api_products = Product.objects.filter(pricing_mode=Product.PricingMode.AUTO_API)
     updated_count = 0

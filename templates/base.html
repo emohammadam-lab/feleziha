@@ -1,6 +1,6 @@
 {% load static humanize %}
 <!DOCTYPE html>
-<html lang="fa" dir="rtl" data-theme="light">
+<html lang="fa" dir="rtl" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +9,7 @@
   <!-- Instant Theme Script to avoid FOUC -->
   <script>
     (function() {
-      var saved = localStorage.getItem('felez_theme') || 'light';
+      var saved = localStorage.getItem('felez_theme') || 'dark';
       document.documentElement.setAttribute('data-theme', saved);
     })();
   </script>
@@ -29,8 +29,8 @@
   <!-- CSRF Token for Secure AJAX Requests -->
   <meta name="csrf-token" content="{{ csrf_token }}">
 
-  <!-- CSS Stylesheet -->
-  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <!-- CSS Stylesheet (Cache-Busted v4.0 for immediate visible Dark Gray theme) -->
+  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=4.0">
   {% block extra_head %}{% endblock %}
 </head>
 <body>
@@ -335,8 +335,8 @@
   <!-- Toast Notifications Container -->
   <div id="toast-container" class="toast-container"></div>
 
-  <!-- Main JavaScript File -->
-  <script src="{% static 'js/main.js' %}"></script>
+  <!-- Main JavaScript File (Cache-Busted v4.0) -->
+  <script src="{% static 'js/main.js' %}?v=4.0"></script>
   {% block extra_scripts %}{% endblock %}
 </body>
 </html>
