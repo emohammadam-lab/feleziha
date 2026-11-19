@@ -30,6 +30,12 @@ class Article(models.Model):
         related_name='articles',
         verbose_name="نویسنده / تحلیل‌گر"
     )
+    image = models.ImageField(
+        upload_to='news/%Y/%m/',
+        blank=True,
+        null=True,
+        verbose_name="تصویر شاخص خبر"
+    )
     image_badge = models.CharField(
         max_length=50,
         default="تحلیل بازار",

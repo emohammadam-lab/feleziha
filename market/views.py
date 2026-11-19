@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.db.models import Q
 from django.contrib.auth import get_user_model
 from .models import Category, SubCategory, Product, PriceHistory, OrderInquiry, SiteContentBlock, MediaAsset
-from .forms import OrderInquiryForm, SalesQuotationUpdateForm, SiteContentBlockForm, MediaAssetForm
+from .forms import OrderInquiryForm, SalesQuotationUpdateForm, SiteContentBlockForm, MediaAssetForm, ProductQuickEditForm
 from .pricing_service import sync_all_api_products, calculate_formula_price
 from news.models import Article
 
@@ -57,20 +57,20 @@ def home_view(request):
             'delivery_address': request.user.address or '',
         }
 
-    # Media Gallery Showcase (عکس، فیلم و سرتیفیکیت کارخانجات)
-    featured_media = MediaAsset.objects.filter(is_active=True).order_by('order', '-created_at')[:6]
-    media_count = MediaAsset.objects.filter(is_active=True).count()
+    # Featured copper products with real industrial photos for top visual showcase
+    featured_products = [p for p in copper_products if p.image][:6]
+    if not featured_products:
+        featured_products = copper_products[:6]
 
     context = {
         'categories': categories,
         'copper_products': copper_products,
+        'featured_products': featured_products,
         'export_rod_products': export_rod_products,
         'busbar_products': busbar_products,
         'wire_conductor_products': wire_conductor_products,
         'cathode_products': cathode_products,
         'tube_sheet_products': tube_sheet_products,
-        'featured_media': featured_media,
-        'media_count': media_count,
         # Preserved in context for future use
         'aluminum_products': aluminum_products,
         'steel_products': steel_products,
@@ -307,6 +307,7 @@ def management_dashboard_view(request):
         'staff_users': staff_users,
         'block_form': SiteContentBlockForm(),
         'media_form': MediaAssetForm(),
+        'product_form': ProductQuickEditForm(),
         'stats': stats,
         'active_tab': active_tab,
         'status_filter': status_filter,
@@ -525,6 +526,33 @@ def block_delete_view(request, block_id):
     block.delete()
     messages.success(request, f"بلاک محتوایی «{title}» حذف شد.")
     return redirect('/management/?tab=content_blocks')
+
+
+# ========================================================
+# PRODUCT SPECIFICATIONS & PHOTO MANAGEMENT
+# ========================================================
+
+@login_required
+def product_edit_view(request, product_id):
+    """
+    Quick edit product specs, brand, warehouse, and photo from management dashboard.
+    """
+    if not (request.user.is_admin_role or request.user.has_price_perm()):
+        messages.error(request, "شما مجوز ویرایش کالا و تصاویر را ندارید.")
+        return redirect('market:management_dashboard')
+
+    prod = get_object_or_404(Product, id=product_id)
+
+    if request.method == 'POST':
+        form = ProductQuickEditForm(request.POST, request.FILES, instance=prod)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"مشخصات و تصویر محصول «{prod.title}» با موفقیت ذخیره شد.")
+            return redirect('/management/?tab=products')
+        else:
+            messages.error(request, f"خطا در فرم ویرایش محصول: {form.errors.as_text()}")
+
+    return redirect('/management/?tab=products')
 
 
 # ========================================================

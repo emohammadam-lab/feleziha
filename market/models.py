@@ -81,6 +81,7 @@ class Product(models.Model):
     description = models.TextField(blank=True, verbose_name="توضیحات و مشخصات فنی")
     standards = models.CharField(max_length=200, blank=True, verbose_name="استانداردهای بین‌المللی", help_text="مثال: ASTM B115, DIN 1787")
     density = models.FloatField(default=8.96, verbose_name="چگالی (g/cm³)", help_text="مس: 8.96، آلومینیوم: 2.70، آهن: 7.85")
+    image = models.ImageField(upload_to='products/%Y/%m/', blank=True, null=True, verbose_name="تصویر محصول")
     
     is_featured = models.BooleanField(default=False, verbose_name="نمایش در تابلو ویژه صفحه نخست")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ثبت")

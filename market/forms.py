@@ -79,3 +79,19 @@ class MediaAssetForm(forms.ModelForm):
             'is_featured': forms.CheckboxInput(attrs={'class': 'form-checkbox'}),
             'is_active': forms.CheckboxInput(attrs={'class': 'form-checkbox'}),
         }
+
+
+class ProductQuickEditForm(forms.ModelForm):
+    class Meta:
+        model = Product
+        fields = ['title', 'manufacturer', 'alloy_grade', 'dimensions', 'stock_status', 'warehouse_location', 'image', 'is_featured']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'نام کالا'}),
+            'manufacturer': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'تولیدکننده / برند'}),
+            'alloy_grade': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'گرید یا آلیاژ'}),
+            'dimensions': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'سایز / ضخامت'}),
+            'stock_status': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'وضعیت موجودی'}),
+            'warehouse_location': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'انبار بارگیری'}),
+            'image': forms.FileInput(attrs={'class': 'form-input'}),
+            'is_featured': forms.CheckboxInput(attrs={'class': 'form-checkbox'}),
+        }

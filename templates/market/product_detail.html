@@ -33,13 +33,21 @@
           </span>
         </div>
 
-        <h1 style="font-size:1.65rem; font-weight:900; color:var(--text-main); line-height:1.35; margin-bottom:1rem;">
-          {{ product.title }}
-        </h1>
-
-        <p style="font-size:0.95rem; color:var(--text-muted); line-height:1.75; margin-bottom:1.75rem;">
-          {{ product.description }}
-        </p>
+        <div style="display:flex; gap:1.5rem; margin-bottom:1.5rem; flex-wrap:wrap;">
+          {% if product.image %}
+            <div style="width:200px; height:150px; border-radius:10px; overflow:hidden; border:1px solid var(--border-subtle); flex-shrink:0; background:var(--bg-body);">
+              <img src="{{ product.image.url }}" alt="{{ product.title }}" style="width:100%; height:100%; object-fit:cover;">
+            </div>
+          {% endif %}
+          <div style="flex:1; min-width:260px;">
+            <h1 style="font-size:1.55rem; font-weight:900; color:var(--text-main); line-height:1.35; margin-bottom:0.75rem;">
+              {{ product.title }}
+            </h1>
+            <p style="font-size:0.925rem; color:var(--text-muted); line-height:1.75;">
+              {{ product.description }}
+            </p>
+          </div>
+        </div>
 
         <!-- Technical Specs Table -->
         <h3 style="font-size:1.1rem; font-weight:800; color:var(--text-main); margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
